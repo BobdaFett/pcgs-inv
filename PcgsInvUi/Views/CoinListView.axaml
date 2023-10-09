@@ -1,0 +1,70 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="PcgsInvUi.Views.CoinListView"
+             x:DataType="viewModels:CoinListViewModel">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <DataGrid x:Name="CollectionView"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Top"
+                      DockPanel.Dock="Top"
+                      ItemsSource="{Binding CoinCollection}"
+                      SelectedItem="{Binding SelectedCoin, Mode=TwoWay}"
+                      AutoGenerateColumns="False"
+                      CanUserResizeColumns="True" >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Series" Width="*"
+                                        Binding="{Binding Series}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Year"         
+                                        Binding="{Binding Year}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Mint" Width="*"
+                                        Binding="{Binding MintMark}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Denomination" Width="*"
+                                        Binding="{Binding Denomination}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Variety" Width="*"
+                                        Binding="{Binding MajorVariety}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Grade" Width="*"
+                                        Binding="{Binding Grade}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Designation" Width="*"
+                                        Binding="{Binding Designation}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Est. Price" Width="*"
+                                        Binding="{Binding PriceGuideValue}" 
+                                        IsReadOnly="False"/>
+                    <DataGridTextColumn Header="PCGS #" Width="*"
+                                        Binding="{Binding PcgsNumber}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Quantity" Width="*"
+                                        Binding="{Binding Quantity}" 
+                                        IsReadOnly="False"/>
+                    <DataGridTextColumn Header="Total Price" Width="*"
+                                        Binding="{Binding TotalPrice}"
+                                        IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto, Auto, Auto" DockPanel.Dock="Left">
+                <Button Grid.Column="0" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="New..." />
+                <Button Grid.Column="1" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Edit..." />
+                <Button Grid.Column="2" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Delete"  />
+                <Button Grid.Column="3" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Find..." 
+                        Command="{Binding $parent[Window].((viewModels:MainWindowViewModel)DataContext).AddItem}"/>
+            </Grid>
+            <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto" DockPanel.Dock="Right">
+                <Label Grid.Column="0" Margin="5" VerticalAlignment="Center" Content="{Binding TotalValue, StringFormat='Total Value: ${0:0.00}'}" />
+                <Button Grid.Column="1" Margin="5" Width="150" HorizontalContentAlignment="Center" Content="Export to CSV..." />
+            </Grid>
+        </DockPanel>
+    </DockPanel>
+</UserControl>

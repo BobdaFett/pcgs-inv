@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="PcgsInvUi/App.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/CoinListView.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/DeleteWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/MainWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/MainWindowOld.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/NewControl.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/NewView.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+      </map>
+    </option>
+  </component>
+</project>
