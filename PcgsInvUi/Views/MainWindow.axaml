@@ -5,5 +5,11 @@
         xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PcgsInvUi.Views.MainWindow" x:DataType="viewModels:MainWindowViewModel"
-        Title="MainWindow"
-        Content="{Binding Content}" />
+        Title="MainWindow">
+    <SplitView Name="Sidebar">
+        <SplitView.Pane>
+            <UserControl Content="{Binding SidebarContent}"/>
+        </SplitView.Pane>
+        <UserControl Content="{Binding MainContent}"/>
+    </SplitView>
+</Window>

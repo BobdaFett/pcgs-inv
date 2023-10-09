@@ -27,8 +27,5 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 [C:/Users/lvas4/RiderProjects/pcgs-inv/PcgsInvUi/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/lvas4/RiderProjects/pcgs-inv/PcgsInvUi/Views/NewControl.axaml]
-build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
-
 [C:/Users/lvas4/RiderProjects/pcgs-inv/PcgsInvUi/Views/NewView.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

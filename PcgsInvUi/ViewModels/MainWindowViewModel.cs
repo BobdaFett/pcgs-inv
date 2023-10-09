@@ -9,23 +9,29 @@ namespace PcgsInvUi.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     public CoinListViewModel List { get; }
-    private ViewModelBase _content;
+    private ViewModelBase _mainContent;
+    private ViewModelBase _sideContent;
     
     public MainWindowViewModel(CoinCollection coins)
     {
         List = new CoinListViewModel(coins.GetItems());
-        Content = List;
+        MainContent = List;
     }
     
-    public ViewModelBase Content
+    public ViewModelBase MainContent
     {
-        get => _content;
-        private set => this.RaiseAndSetIfChanged(ref _content, value);
+        get => _mainContent;
+        private set => this.RaiseAndSetIfChanged(ref _mainContent, value);
+    }
+
+    public ViewModelBase SidebarContent
+    {
+        get => _sideContent;
+        private set => this.RaiseAndSetIfChanged(ref _sideContent, value);
     }
 
     public void AddItem()
     {
-        Console.WriteLine("You hit the button!");
         var newViewModel = new NewViewModel();
 
         Observable.Merge(
@@ -37,9 +43,24 @@ public class MainWindowViewModel : ViewModelBase
                 if (model != null)
                     List.CoinCollection.Add(model);
 
-                Content = List;
+                MainContent = List;
             });
         
-        Content = newViewModel;
+        MainContent = newViewModel;
+    }
+
+    public void EditItem()
+    {
+        var editViewModel = new EditViewModel(List.SelectedCoin);
+    }
+
+    public void DeleteItem()
+    {
+        
+    }
+
+    public void FindItem()
+    {
+        
     }
 }
