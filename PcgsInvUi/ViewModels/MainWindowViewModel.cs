@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using PcgsInvUi.Models;
 using PcgsInvUi.Services;
 using ReactiveUI;
@@ -8,26 +10,36 @@ namespace PcgsInvUi.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public CoinListViewModel List { get; }
-    private ViewModelBase _mainContent;
-    private ViewModelBase _sideContent;
-    
-    public MainWindowViewModel(CoinCollection coins)
+    public bool PaneOpen
     {
-        List = new CoinListViewModel(coins.GetItems());
-        MainContent = List;
+        get => _paneOpen;
+        set => this.RaiseAndSetIfChanged(ref _paneOpen, value);
     }
-    
-    public ViewModelBase MainContent
-    {
-        get => _mainContent;
-        private set => this.RaiseAndSetIfChanged(ref _mainContent, value);
-    }
-
     public ViewModelBase SidebarContent
     {
         get => _sideContent;
         private set => this.RaiseAndSetIfChanged(ref _sideContent, value);
+    }
+    public ObservableCollection<Coin> CoinCollection { get; set; }
+    public Coin SelectedCoin
+    {
+        get => _selectedCoin;
+        set => this.RaiseAndSetIfChanged(ref _selectedCoin, value);
+    }
+    public double TotalValue
+    {
+        get => _totalValue;
+        set => this.RaiseAndSetIfChanged(ref _totalValue, value);
+    }
+    
+    private ViewModelBase? _sideContent;
+    private Coin? _selectedCoin;
+    private bool _paneOpen;
+    private double _totalValue;
+
+    public MainWindowViewModel(CoinCollection coins)
+    {
+        CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
     }
 
     public void AddItem()
@@ -38,20 +50,30 @@ public class MainWindowViewModel : ViewModelBase
                 newViewModel.OkCommand,
                 newViewModel.CancelCommand.Select(_ => (Coin?)null))
             .Take(1)
-            .Subscribe(model =>
+            .Subscribe(newCoin =>
             {
-                if (model != null)
-                    List.CoinCollection.Add(model);
+                if (newCoin != null)
+                {
+                    // This raises a CollectionChanged event, which *should* update the UI, but doesn't.
+                    CoinCollection.Add(newCoin);
+                    // Update view
+                    TotalValue += newCoin.TotalPrice;
+                    
+                    // Setting main content to null and then back to the main view model works just fine.
+                    // TotalValue updates just fine.
+                }
 
-                MainContent = List;
+                SidebarContent = null;
+                PaneOpen = false;
             });
         
-        MainContent = newViewModel;
+        SidebarContent = newViewModel;
+        PaneOpen = true;
     }
 
     public void EditItem()
     {
-        var editViewModel = new EditViewModel(List.SelectedCoin);
+        var editViewModel = new EditViewModel(SelectedCoin);
     }
 
     public void DeleteItem()

@@ -1,10 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using PcgsInvUi.ViewModels;
 
 namespace PcgsInvUi.Views;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     // TODO New window.
     // TODO Edit window.
@@ -20,7 +22,7 @@ public partial class MainWindow : Window
     // TODO API request tracker (1000 per day)
     // TODO API update schedules (per month? manual override? needs to store a date of last update in the coin object)
 
-    
+
     public MainWindow()
     {
         InitializeComponent();

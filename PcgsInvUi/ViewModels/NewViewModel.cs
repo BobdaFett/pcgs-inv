@@ -43,7 +43,9 @@ public class NewViewModel : ViewModelBase
         OkCommand = ReactiveCommand.Create(
             () => new Coin { PcgsNumber = Int32.Parse(PcgsNumber),
                 Grade = Grade,
-                Quantity = Int32.Parse(Quantity) },
+                Quantity = Int32.Parse(Quantity),
+                PriceGuideValue = 100.0
+            },
             okEnabled);
         
         CancelCommand = ReactiveCommand.Create(() => { });
