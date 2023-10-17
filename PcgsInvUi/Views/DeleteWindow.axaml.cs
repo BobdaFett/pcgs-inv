@@ -1,27 +1,16 @@
-﻿using Avalonia.Controls;
-using Avalonia.Interactivity;
+﻿using PcgsInvUi.ViewModels;
+using Avalonia.ReactiveUI;
+using ReactiveUI;
+using System;
+
 
 namespace PcgsInvUi.Views;
 
-public partial class DeleteWindow : Window
+public partial class DeleteWindow : ReactiveWindow<DeleteWindowViewModel>
 {
-    public bool Accepted { get; set; }
-    
     public DeleteWindow()
     {
         InitializeComponent();
-        Accepted = false;
-    }
-    
-    public void AcceptClicked(object source, RoutedEventArgs args)
-    {
-        // TODO Delete the SelectedCoin?
-        Accepted = true;
-        Close();
-    }
-    
-    public void CancelClicked(object source, RoutedEventArgs args)
-    {
-        Close();
+        this.WhenActivated(d => d(ViewModel!.OkCommand.Subscribe(Close)));
     }
 }

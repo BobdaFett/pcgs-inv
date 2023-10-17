@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Reactive.Linq;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System.Reactive.Linq;
+using System.Windows.Input;
 using PcgsInvUi.Models;
 using PcgsInvUi.Services;
 using ReactiveUI;
@@ -10,11 +10,6 @@ namespace PcgsInvUi.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public bool PaneOpen
-    {
-        get => _paneOpen;
-        set => this.RaiseAndSetIfChanged(ref _paneOpen, value);
-    }
     public ViewModelBase SidebarContent
     {
         get => _sideContent;
@@ -31,54 +26,39 @@ public class MainWindowViewModel : ViewModelBase
         get => _totalValue;
         set => this.RaiseAndSetIfChanged(ref _totalValue, value);
     }
+    public ICommand DeleteCommand { get; }
+    public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
     
     private ViewModelBase? _sideContent;
     private Coin? _selectedCoin;
-    private bool _paneOpen;
     private double _totalValue;
+    private PcgsClient _pcgsClient;
 
     public MainWindowViewModel(CoinCollection coins)
     {
-        CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
-    }
-
-    public void AddItem()
-    {
         var newViewModel = new NewViewModel();
-
-        Observable.Merge(
-                newViewModel.OkCommand,
-                newViewModel.CancelCommand.Select(_ => (Coin?)null))
-            .Take(1)
-            .Subscribe(newCoin =>
-            {
-                if (newCoin != null)
-                {
-                    // This raises a CollectionChanged event, which *should* update the UI, but doesn't.
-                    CoinCollection.Add(newCoin);
-                    // Update view
-                    TotalValue += newCoin.TotalPrice;
-                    
-                    // Setting main content to null and then back to the main view model works just fine.
-                    // TotalValue updates just fine.
-                }
-
-                SidebarContent = null;
-                PaneOpen = false;
-            });
-        
         SidebarContent = newViewModel;
-        PaneOpen = true;
-    }
-
-    public void EditItem()
-    {
-        var editViewModel = new EditViewModel(SelectedCoin);
-    }
-
-    public void DeleteItem()
-    {
+        CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
+        _pcgsClient = new PcgsClient("eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
         
+        ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
+        DeleteCommand = ReactiveCommand.CreateFromTask(async () =>
+        {
+            var deleteViewModel = new DeleteWindowViewModel();
+            var result = await ShowDeleteWindow.Handle(deleteViewModel);
+            if (result) CoinCollection.Remove(SelectedCoin);
+        });
+        
+        // Subscribe to SidebarContent.OkCommand, which is an IObservable<(int, string, int)>
+        // This is the same as the above, but with a different syntax.
+        newViewModel.OkCommand
+            .Subscribe(async requestStructure =>
+            {
+                var newCoin = await _pcgsClient.GetCoinFactsByGrade(requestStructure.Item1, requestStructure.Item2);
+                newCoin.Quantity = requestStructure.Item3;
+                CoinCollection.Add(newCoin);
+                TotalValue += newCoin.Quantity * newCoin.PriceGuideValue;
+            });
     }
 
     public void FindItem()

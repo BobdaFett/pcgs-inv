@@ -5,12 +5,12 @@ namespace PcgsInvUi.Models;
 
 public class Coin : ReactiveObject
 {
-    public int PcgsNumber
+    public string PCGSNo
     {
-        get => _pcgsNumber;
-        set => this.RaiseAndSetIfChanged(ref _pcgsNumber, value);
+        get => _pcgsNo;
+        set => this.RaiseAndSetIfChanged(ref _pcgsNo, value);
     }
-    private int _pcgsNumber;
+    private string _pcgsNo;
 
     public string Name
     {
@@ -50,8 +50,13 @@ public class Coin : ReactiveObject
     public double PriceGuideValue
     {
         get => _priceGuideValue;
-        set => this.RaiseAndSetIfChanged(ref _priceGuideValue, value);
+        set
+        {
+            TotalPrice = value * Quantity;
+            this.RaiseAndSetIfChanged(ref _priceGuideValue, value);
+        }
     }
+
     private double _priceGuideValue;
 
     public string CoinFactsLink
@@ -82,12 +87,12 @@ public class Coin : ReactiveObject
     }
     private string _dieVariety;
 
-    public string Series
+    public string SeriesName
     {
-        get => _series;
-        set => this.RaiseAndSetIfChanged(ref _series, value);
+        get => _seriesName;
+        set => this.RaiseAndSetIfChanged(ref _seriesName, value);
     }
-    private string _series;
+    private string _seriesName;
 
     public string Category
     {
@@ -113,11 +118,21 @@ public class Coin : ReactiveObject
     public int Quantity
     {
         get => _quantity;
-        set => this.RaiseAndSetIfChanged(ref _quantity, value);
+        set
+        {
+            TotalPrice = value * PriceGuideValue;
+            this.RaiseAndSetIfChanged(ref _quantity, value);
+        }
     }
+
     private int _quantity;
-    
-    public double TotalPrice => Quantity * PriceGuideValue;
+
+    public double TotalPrice
+    {
+        get => _totalPrice;
+        set => this.RaiseAndSetIfChanged(ref _totalPrice, value);
+    }
+    private double _totalPrice;
 
     public double PaidFor
     {
@@ -126,10 +141,34 @@ public class Coin : ReactiveObject
     }
     private double _paidFor;
 
-    public String Notes
+    public string Notes
     {
         get => _notes;
         set => this.RaiseAndSetIfChanged(ref _notes, value);
     }
     private string _notes;
+    
+    public Coin()
+    {
+        PCGSNo = "";
+        Name = "";
+        Year = 0;
+        Denomination = "";
+        MintMark = "";
+        Grade = "";
+        PriceGuideValue = 0;
+        CoinFactsLink = "";
+        MajorVariety = "";
+        MinorVariety = "";
+        DieVariety = "";
+        SeriesName = "";
+        Category = "";
+        Designation = "";
+        CertificateNumber = 0;
+        Quantity = 0;
+        PaidFor = 0;
+        Notes = "";
+        
+        
+    }
 }

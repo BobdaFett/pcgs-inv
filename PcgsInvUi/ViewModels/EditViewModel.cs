@@ -16,10 +16,10 @@ public class EditViewModel : ViewModelBase
         CurrentCoin = coin;
 
         var okEnabled = this.WhenAnyValue(
-            x => x.CurrentCoin.PcgsNumber,
+            x => x.CurrentCoin.PCGSNo,
             x => x.CurrentCoin.Grade,
             x => x.CurrentCoin.Quantity,
-            (id, grade, quantity) => (id != 0) &&
+            (id, grade, quantity) => !string.IsNullOrWhiteSpace(id) &&
                                      !string.IsNullOrWhiteSpace(grade) &&
                                      (quantity != 0)
         );

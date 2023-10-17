@@ -1,8 +1,8 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using System;
+using System.Threading.Tasks;
 using Avalonia.ReactiveUI;
 using PcgsInvUi.ViewModels;
+using ReactiveUI;
 
 namespace PcgsInvUi.Views;
 
@@ -10,7 +10,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     // TODO New window.
     // TODO Edit window.
-    // TODO Delete window.
     // TODO Find window.
     // TODO Export window.
     // TODO Error handling.
@@ -22,9 +21,18 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     // TODO API request tracker (1000 per day)
     // TODO API update schedules (per month? manual override? needs to store a date of last update in the coin object)
 
-
     public MainWindow()
     {
         InitializeComponent();
+        this.WhenActivated(d => d(ViewModel!.ShowDeleteWindow.RegisterHandler(ShowDeleteWindowAsync)));
+    }
+
+    public async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, Boolean> interaction)
+    {
+        var window = new DeleteWindow();
+        window.DataContext = interaction.Input;
+
+        var result = await window.ShowDialog<bool>(this);
+        interaction.SetOutput(result);
     }
 }

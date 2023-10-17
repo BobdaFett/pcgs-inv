@@ -1,9 +1,9 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
         d:DesignWidth="325" d:DesignHeight="100"
-        x:Class="PcgsInvUi.Views.DeleteWindow"
+        x:Class="PcgsInvUi.Views.DeleteWindow" x:DataType="viewModels:DeleteWindowViewModel"
         Width="325" Height="100" WindowStartupLocation="CenterOwner"
         Title="DeleteWindow">
     <Grid ColumnDefinitions="*, *" RowDefinitions="*, *">
@@ -14,11 +14,11 @@
                 Width="100"
                 HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                 HorizontalContentAlignment="Center"
-                Content="Yes" Click="AcceptClicked"/>
+                Content="Yes" Command="{Binding OkCommand}"/>
         <Button Grid.Row="1" Grid.Column="1" Margin="5"
                 Width="100"
                 HorizontalAlignment="Stretch" VerticalAlignment="Center" 
                 HorizontalContentAlignment="Center" 
-                Content="No" Click="CancelClicked"/>
+                Content="No" Command="{Binding CancelCommand}"/>
     </Grid>
 </Window>

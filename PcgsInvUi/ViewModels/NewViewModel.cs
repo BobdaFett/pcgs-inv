@@ -1,16 +1,14 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using System.Collections.Generic;
-using PcgsInvUi.Models;
 using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
 public class NewViewModel : ViewModelBase
 {
-    private string _pcgsNumber;
-    private string _grade;
-    private string _quantity;
+    private string _pcgsNumber = "";
+    private string _grade = "";
+    private string _quantity = "";
     
     public string PcgsNumber
     {
@@ -40,15 +38,23 @@ public class NewViewModel : ViewModelBase
                                      !string.IsNullOrWhiteSpace(quantity));
 
         // This will eventually send our request to the public API, then construct our coin.
+        // OkCommand = ReactiveCommand.Create(
+        //     () => new Coin { PcgsNumber = Int32.Parse(PcgsNumber),
+        //         Grade = Grade,
+        //         Quantity = Int32.Parse(Quantity)
+        //     },
+        //     okEnabled);
+
         OkCommand = ReactiveCommand.Create(
-            () => new Coin { PcgsNumber = Int32.Parse(PcgsNumber),
-                Grade = Grade,
-                Quantity = Int32.Parse(Quantity),
-                PriceGuideValue = 100.0
-            },
+            () => (int.Parse(PcgsNumber), Grade, int.Parse(Quantity)),
             okEnabled);
         
-        CancelCommand = ReactiveCommand.Create(() => { });
+        ClearCommand = ReactiveCommand.Create(() =>
+        {
+            PcgsNumber = "";
+            Grade = "";
+            Quantity = "";
+        });
 
         // Initialize grade values for use in the view.
         // This must be typed out manually, as there is no way to get a list of grades from the API.
@@ -86,8 +92,8 @@ public class NewViewModel : ViewModelBase
             "MS-70"
         };
     }
-
-    public ReactiveCommand<Unit, Coin> OkCommand { get; }
-    public ReactiveCommand<Unit, Unit> CancelCommand { get; }
+    
+    public ReactiveCommand<Unit, (int, string, int)> OkCommand { get; }
+    public ReactiveCommand<Unit, Unit> ClearCommand { get; }
 
 }
