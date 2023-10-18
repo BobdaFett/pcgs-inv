@@ -37,14 +37,6 @@ public class NewViewModel : ViewModelBase
                                      !string.IsNullOrWhiteSpace(grade) &&
                                      !string.IsNullOrWhiteSpace(quantity));
 
-        // This will eventually send our request to the public API, then construct our coin.
-        // OkCommand = ReactiveCommand.Create(
-        //     () => new Coin { PcgsNumber = Int32.Parse(PcgsNumber),
-        //         Grade = Grade,
-        //         Quantity = Int32.Parse(Quantity)
-        //     },
-        //     okEnabled);
-
         OkCommand = ReactiveCommand.Create(
             () => (int.Parse(PcgsNumber), Grade, int.Parse(Quantity)),
             okEnabled);
