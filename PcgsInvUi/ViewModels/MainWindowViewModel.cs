@@ -43,12 +43,14 @@ public class MainWindowViewModel : ViewModelBase
         _pcgsClient = new PcgsClient("eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
         
         ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
+        var deleteEnabled = this.WhenAnyValue(x => x.SelectedCoin)
+            .Select(x => x != null);
         DeleteCommand = ReactiveCommand.CreateFromTask(async () =>
         {
             var deleteViewModel = new DeleteWindowViewModel();
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
-            if (result && SelectedCoin != null) CoinCollection.Remove(SelectedCoin);
-        });
+            if (result) CoinCollection.Remove(SelectedCoin);  // possible null deref - ignored due to button being disabled.
+        }, deleteEnabled);
         
         // Subscribe to SidebarContent.OkCommand, which is an IObservable<(int, string, int)>
         // This is the same as the above, but with a different syntax.
@@ -61,9 +63,9 @@ public class MainWindowViewModel : ViewModelBase
                 TotalValue += newCoin.Quantity * newCoin.PriceGuideValue;
             });
         
-        // Change TotalValue anytime SelectedCoin.TotalPrice changes. This does work properly with the DeleteCommand.
+        // Change TotalValue anytime SelectedCoin.TotalPrice changes.
+        // Possible null deref - ignored due to null values summing to 0.
         this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
-            .Where(x => x != null)
             .Subscribe(_ => TotalValue = CoinCollection.Sum(x => x.TotalPrice) );
     }
 }
