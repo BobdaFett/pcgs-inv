@@ -8,14 +8,11 @@ namespace PcgsInvUi.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
-    // TODO New window.
-    // TODO Edit window.
     // TODO Find window.
-    // TODO Export window.
+    // TODO Export window and export function.
     // TODO Error handling.
     // TODO Manual handling of API key.
     // TODO Use CoinFacts link.
-    // TODO Export to CSV.
     // TODO Take giant sheet of coins to integrate into the application.
     // TODO Update all coins.
     // TODO API request tracker (1000 per day)
