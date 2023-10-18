@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Remove="obj\**" />
   </ItemGroup>
 
 
@@ -59,5 +60,26 @@
   <ItemGroup>
     <Compile Include="obj\Debug\net6.0\.NETCoreApp,Version=v6.0.AssemblyAttributes.cs" />
     <Compile Include="obj\Debug\net6.0\PcgsInvUi.AssemblyInfo.cs" />
+    <Compile Remove="obj\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <AvaloniaXaml Remove="obj\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <EmbeddedResource Remove="obj\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <AdditionalFiles Remove="obj\**" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Remove="obj\**" />
   </ItemGroup>
 </Project>
