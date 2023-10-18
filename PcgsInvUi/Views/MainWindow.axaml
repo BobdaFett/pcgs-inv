@@ -19,7 +19,7 @@
         <Grid RowDefinitions="*, Auto" ShowGridLines="False">
             <DataGrid Grid.Row="0" HorizontalAlignment="Stretch"
                       VerticalAlignment="Stretch"
-                      ItemsSource="{Binding CoinCollection}"
+                      ItemsSource="{Binding DisplayedList}"
                       SelectedItem="{Binding SelectedCoin, Mode=TwoWay}"
                       AutoGenerateColumns="False"
                       CanUserResizeColumns="True">

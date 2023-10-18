@@ -50,7 +50,7 @@ public class NewViewModel : ViewModelBase
 
         // Initialize grade values for use in the view.
         // This must be typed out manually, as there is no way to get a list of grades from the API.
-        GradesList = new List<string>()
+        GradesList = new List<string>
         {
             "P-01",
             "FR-02",

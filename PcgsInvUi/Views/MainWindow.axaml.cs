@@ -22,4 +22,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         var result = await window.ShowDialog<bool>(this);
         interaction.SetOutput(result);
     }
+    
+    public async Task ShowFindWindowAsync(InteractionContext<FindWindowViewModel, int> interaction)
+    {
+        var window = new FindWindow();
+        window.DataContext = interaction.Input;
+
+        var result = await window.ShowDialog<int>(this);
+        interaction.SetOutput(result);
+    }
 }
