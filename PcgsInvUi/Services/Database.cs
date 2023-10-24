@@ -1,6 +1,5 @@
 ﻿namespace PcgsInvUi.Services;
 
-public class Database
-{
-    // TODO Create a database using SQLite.
+public class Database {
+    public Database() { }
 }

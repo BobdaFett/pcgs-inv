@@ -4,31 +4,29 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-public class NewViewModel : ViewModelBase
-{
+public class NewViewModel : ViewModelBase {
     private string _pcgsNumber = "";
     private string _grade = "";
     private string _quantity = "";
-    
-    public string PcgsNumber
-    {
+
+    public string PcgsNumber {
         get => _pcgsNumber;
         set => this.RaiseAndSetIfChanged(ref _pcgsNumber, value);
     }
-    public string Grade
-    {
+
+    public string Grade {
         get => _grade;
         set => this.RaiseAndSetIfChanged(ref _grade, value);
     }
-    public string Quantity
-    {
+
+    public string Quantity {
         get => _quantity;
         set => this.RaiseAndSetIfChanged(ref _quantity, value);
     }
+
     public List<string> GradesList { get; }
 
-    public NewViewModel()
-    {
+    public NewViewModel() {
         var okEnabled = this.WhenAnyValue(
             x => x.PcgsNumber,
             x => x.Grade,
@@ -40,9 +38,8 @@ public class NewViewModel : ViewModelBase
         OkCommand = ReactiveCommand.Create(
             () => (int.Parse(PcgsNumber), Grade, int.Parse(Quantity)),
             okEnabled);
-        
-        ClearCommand = ReactiveCommand.Create(() =>
-        {
+
+        ClearCommand = ReactiveCommand.Create(() => {
             PcgsNumber = "";
             Grade = "";
             Quantity = "";
@@ -50,8 +47,7 @@ public class NewViewModel : ViewModelBase
 
         // Initialize grade values for use in the view.
         // This must be typed out manually, as there is no way to get a list of grades from the API.
-        GradesList = new List<string>
-        {
+        GradesList = new List<string> {
             "P-01",
             "FR-02",
             "AG-03",
@@ -84,8 +80,7 @@ public class NewViewModel : ViewModelBase
             "MS-70"
         };
     }
-    
+
     public ReactiveCommand<Unit, (int, string, int)> OkCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearCommand { get; }
-
 }

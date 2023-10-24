@@ -5,14 +5,12 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-public class EditViewModel : ViewModelBase
-{
+public class EditViewModel : ViewModelBase {
     public Coin CurrentCoin { get; set; }
-    
+
     public ReactiveCommand<Unit, Unit> OkCommand { get; }
 
-    public EditViewModel(Coin coin)
-    {
+    public EditViewModel(Coin coin) {
         CurrentCoin = coin;
 
         var okEnabled = this.WhenAnyValue(
@@ -23,7 +21,7 @@ public class EditViewModel : ViewModelBase
                                      !string.IsNullOrWhiteSpace(grade) &&
                                      (quantity != 0)
         );
-        
+
         // Setup OkCommand - all Coin-related properties must be non-whitespace.
         OkCommand = ReactiveCommand.Create(() => { });
     }

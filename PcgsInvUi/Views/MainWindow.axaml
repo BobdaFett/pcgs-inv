@@ -9,11 +9,12 @@
         WindowStartupLocation="CenterOwner">
     <SplitView IsPaneOpen="True"
                DisplayMode="Inline"
-               PanePlacement="Right" >
+               PanePlacement="Right">
         <SplitView.Pane>
             <Grid RowDefinitions="Auto, *">
-                <UserControl Grid.Row="0" Margin="10, 20, 10, 10" VerticalAlignment="Center" Content="{Binding SidebarContent}"/>
-                <TextBox Grid.Row="1" Margin="5" Watermark="Notes..."/>
+                <UserControl Grid.Row="0" Margin="10, 20, 10, 10" VerticalAlignment="Center"
+                             Content="{Binding SidebarContent}" />
+                <TextBox Grid.Row="1" Margin="5" Watermark="Notes..." />
             </Grid>
         </SplitView.Pane>
         <Grid RowDefinitions="*, Auto" ShowGridLines="False">
@@ -26,49 +27,54 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Series" Width="*"
                                         Binding="{Binding SeriesName}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Year"         
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn Header="Year"
                                         Binding="{Binding Year}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Mint" Width="*"
                                         Binding="{Binding MintMark}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Denomination" Width="*"
                                         Binding="{Binding Denomination}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Variety" Width="*"
                                         Binding="{Binding MajorVariety}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Grade" Width="*"
                                         Binding="{Binding Grade}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Designation" Width="*"
                                         Binding="{Binding Designation}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Est. Price" Width="*"
-                                        Binding="{Binding PriceGuideValue}" 
-                                        IsReadOnly="False"/>
+                                        Binding="{Binding PriceGuideValue}"
+                                        IsReadOnly="False" />
                     <DataGridTextColumn Header="PCGS #" Width="*"
                                         Binding="{Binding PCGSNo}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Quantity" Width="*"
-                                        Binding="{Binding Quantity}" 
-                                        IsReadOnly="False"/>
+                                        Binding="{Binding Quantity}"
+                                        IsReadOnly="False" />
                     <DataGridTextColumn Header="Total Price" Width="*"
                                         Binding="{Binding TotalPrice, StringFormat='${0:0.00}'}"
                                         IsReadOnly="True" />
                 </DataGrid.Columns>
             </DataGrid>
             <DockPanel Grid.Row="1">
-                <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto" DockPanel.Dock="Left">
-                    <Button Grid.Column="0" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Delete"  
-                            Command="{Binding DeleteCommand}"/>
-                    <Button Grid.Column="1" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Find..." 
-                            Command="{Binding FindCommand}"/>
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto"
+                      DockPanel.Dock="Left">
+                    <Button Grid.Column="0" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Delete"
+                            Command="{Binding DeleteCommand}" />
+                    <Button Grid.Column="1" Margin="5" Width="100" HorizontalContentAlignment="Center"
+                            Content="Find..."
+                            Command="{Binding FindCommand}" />
                 </Grid>
-                <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto" DockPanel.Dock="Right">
-                    <Label Grid.Column="0" Margin="5" VerticalAlignment="Center" Content="{Binding TotalValue, StringFormat='Total Value: ${0:0.00}'}" />
-                    <Button Grid.Column="1" Margin="5" Width="150" HorizontalContentAlignment="Center" Content="Export to CSV..." />
+                <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto"
+                      DockPanel.Dock="Right">
+                    <Label Grid.Column="0" Margin="5" VerticalAlignment="Center"
+                           Content="{Binding TotalValue, StringFormat='Total Value: ${0:0.00}'}" />
+                    <Button Grid.Column="1" Margin="5" Width="150" HorizontalContentAlignment="Center"
+                            Content="Export to CSV..." />
                 </Grid>
             </DockPanel>
         </Grid>
