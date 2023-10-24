@@ -46,7 +46,7 @@ public class Database {
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText =
             $"CREATE TABLE IF NOT EXISTS {collectionName} (" +
-            "PCGS_NUMBER INTEGER," +
+            "PCGS_NUMBER TEXT," +
             "GRADE TEXT" +
             "NAME TEXT," +
             "YEAR INTEGER," +
@@ -60,7 +60,7 @@ public class Database {
             "SERIES_NAME TEXT," +
             "CATEGORY TEXT," +
             "DESIGNATION TEXT," +
-            "CERT_NUM TEXT," +
+            "CERT_NUM INTEGER," +
             "QUANTITY INTEGER," +
             "PRIMARY KEY(PCGS_NUMBER, GRADE))";
         
@@ -79,17 +79,15 @@ public class Database {
         // Create a SQL command.
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText =
-            "INSERT INTO CollectionTable (PCGS_NUMBER, GRADE, NAME, YEAR," +
+            "INSERT INTO CollectionTable (PCGS_NUMBER, GRADE, YEAR," +
             "DENOMINATION, MINT_MARK, PRICE_GUIDE_VALUE, COIN_FACTS_LINK," +
             "MAJOR_VARIETY, MINOR_VARIETY, DIE_VARIETY, SERIES_NAME, CATEGORY, DESIGNATION," +
             "CERT_NUM, QUANTITY) " +
-            "VALUES (@PcgsNumber, @Name, @Grade, @Value, @Year, @Denomination, @MintMark, @PriceGuideValue," +
+            "VALUES (@PcgsNumber, @Grade, @Year, @Denomination, @MintMark, @PriceGuideValue," +
             "@CoinFactsLink, @MajorVariety, @MinorVariety, @DieVariety, @SeriesName, @Category, @Designation," +
             "@CertificateNumber, @Quantity)";
         cmd.Parameters.AddWithValue("@PcgsNumber", newCoin.PCGSNo);
-        cmd.Parameters.AddWithValue("@Name", newCoin.Name);
         cmd.Parameters.AddWithValue("@Grade", newCoin.Grade);
-        cmd.Parameters.AddWithValue("@Value", newCoin.PriceGuideValue);
         cmd.Parameters.AddWithValue("@Year", newCoin.Year);
         cmd.Parameters.AddWithValue("@Denomination", newCoin.Denomination);
         cmd.Parameters.AddWithValue("@MintMark", newCoin.MintMark);
@@ -117,34 +115,59 @@ public class Database {
         using (var reader = cmd.ExecuteReader()) {
             while (reader.Read()) {
                 // Create coin from reader then add to list.
-                Coin coin = new Coin();
-                coins.Add(coin);
+                coins.Add(CoinFromReader(reader));
             }
         }
         
         return coins;
     }
     
-    public Coin GetCoin(int pcgsNumber, string grade) {
+    public Coin? GetCoin(int pcgsNumber, string grade) {
         // Get the coin based off of the pcgs number.
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText = "SELECT * FROM CollectionTable WHERE Id = @Id AND Grade = @Grade";
         cmd.Parameters.AddWithValue("@Id", pcgsNumber);
         cmd.Parameters.AddWithValue("@Grade", grade);
+
+        Coin? returnCoin = null;
         
         // Execute the command.
         using (var reader = cmd.ExecuteReader()) {
             while (reader.Read()) {
-                // TODO Create a coin from the reader.
-                Console.WriteLine(reader.ToString());
-                Coin coin = new Coin();
+                returnCoin = CoinFromReader(reader);
             }
         }
 
-        return new Coin();
+        return returnCoin;
+    }
+    
+    private Coin CoinFromReader(SQLiteDataReader reader) {
+        Coin coin = new Coin();
+        coin.PCGSNo = reader.GetString(0);
+        coin.Grade = reader.GetString(1);
+        coin.Year = reader.GetInt32(2);
+        coin.Denomination = reader.GetString(3);
+        coin.MintMark = reader.GetString(4);
+        coin.PriceGuideValue = reader.GetDouble(5);
+        coin.CoinFactsLink = reader.GetString(6);
+        coin.MajorVariety = reader.GetString(7);
+        coin.MinorVariety = reader.GetString(8);
+        coin.DieVariety = reader.GetString(9);
+        coin.SeriesName = reader.GetString(10);
+        coin.Category = reader.GetString(11);
+        coin.Designation = reader.GetString(12);
+        coin.CertificateNumber = reader.GetInt32(13);
+        coin.Quantity = reader.GetInt32(14);
+        coin.TotalPrice = coin.Quantity * coin.PriceGuideValue;
+        return coin;
     }
 
     public void DeleteCoin(Coin delCoin) {
+        SQLiteCommand cmd = Connection.CreateCommand();
+        cmd.CommandText = "DELETE FROM CollectionTable WHERE PCGS_NUMBER = @PcgsNumber AND GRADE = @Grade";
+        cmd.Parameters.AddWithValue("@PcgsNumber", delCoin.PCGSNo);
+        cmd.Parameters.AddWithValue("@Grade", delCoin.Grade);
         
+        cmd.ExecuteNonQuery();
     }
 }

@@ -14,25 +14,26 @@ namespace PcgsInvUi.ViewModels;
 // TODO Error handling.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
+// TODO Splash screen that loads.
 // TODO Take giant sheet of coins to integrate into the application.
-// TODO Update all coins.
+// TODO Update all coins. Choose those that are older first.
 // TODO API request tracker (1000 per day)
-// TODO API update schedules (per month? manual override? needs to store a date of last update in the coin object)
+// TODO Ok button greys out while request is happening.
+// TODO Track when coins were last updated.
+// TODO Image for coin in notes view.
 
 public class MainWindowViewModel : ViewModelBase {
     public ViewModelBase SidebarContent {
         get => _sideContent;
         private set => this.RaiseAndSetIfChanged(ref _sideContent, value);
     }
-
     public ObservableCollection<Coin> CoinCollection { get; set; }
     public ObservableCollection<Coin> DisplayedList { get; set; }
-
+    public Database ConnectedDatabase { get; set; }
     public Coin? SelectedCoin {
         get => _selectedCoin;
         set => this.RaiseAndSetIfChanged(ref _selectedCoin, value);
     }
-
     public double TotalValue {
         get => _totalValue;
         set => this.RaiseAndSetIfChanged(ref _totalValue, value);
@@ -48,10 +49,14 @@ public class MainWindowViewModel : ViewModelBase {
     private double _totalValue;
     private PcgsClient _pcgsClient;
 
-    public MainWindowViewModel(CoinCollection coins) {
+    // public MainWindowViewModel(CoinCollection coins) {
+    public MainWindowViewModel(Database coins) {
+        ConnectedDatabase = coins;
         var newViewModel = new NewViewModel();
         _sideContent = newViewModel;
-        DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
+        // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
+        DisplayedList = CoinCollection =
+            new ObservableCollection<Coin>(coins.GetCollection("CollectionTable"));
         _pcgsClient = new PcgsClient(
             "eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
 
@@ -62,8 +67,10 @@ public class MainWindowViewModel : ViewModelBase {
         DeleteCommand = ReactiveCommand.CreateFromTask(async () => {
             var deleteViewModel = new DeleteWindowViewModel();
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
-            if (result)
+            if (result && SelectedCoin != null) {
+                ConnectedDatabase.DeleteCoin(SelectedCoin);
                 CoinCollection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
+            }
         }, deleteEnabled);
 
         // Set up the ability to open the find window.
@@ -85,6 +92,7 @@ public class MainWindowViewModel : ViewModelBase {
                 var newCoin = await _pcgsClient.GetCoinFactsByGrade(requestStructure.Item1, requestStructure.Item2);
                 newCoin.Quantity = requestStructure.Item3;
                 CoinCollection.Add(newCoin);
+                coins.InsertCoin(newCoin);
                 TotalValue += newCoin.Quantity * newCoin.PriceGuideValue;
             });
 

@@ -16,12 +16,8 @@ public partial class App : Application {
     public override void OnFrameworkInitializationCompleted() {
         base.OnFrameworkInitializationCompleted();
         
-        // Create a connection to SQLite
-        var database = new Database();
-        var coin = database.GetCoin(1003, "AG-3");
-        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
-            var coins = new Services.CoinCollection();
+            var coins = new Database();
 
             desktop.MainWindow = new MainWindow {
                 DataContext = new MainWindowViewModel(coins),
