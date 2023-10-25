@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -9,8 +10,6 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-// TODO Find window.
-// TODO Export window and export function.
 // TODO Error handling.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
@@ -43,6 +42,8 @@ public class MainWindowViewModel : ViewModelBase {
     public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
     public ReactiveCommand<Unit, Coin> FindCommand { get; }
     public Interaction<FindWindowViewModel, int> ShowFindWindow { get; }
+    public ReactiveCommand<Unit, Unit> ExportCommand { get; }
+    public Interaction<Unit, Stream> ShowExportWindow { get; }
 
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
@@ -67,12 +68,29 @@ public class MainWindowViewModel : ViewModelBase {
         DeleteCommand = ReactiveCommand.CreateFromTask(async () => {
             var deleteViewModel = new DeleteWindowViewModel();
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
-            if (result && SelectedCoin != null) {
+            if (result && SelectedCoin is not null) {
                 ConnectedDatabase.DeleteCoin(SelectedCoin);
                 CoinCollection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
             }
         }, deleteEnabled);
 
+        ShowExportWindow = new Interaction<Unit, Stream>();
+        ExportCommand = ReactiveCommand.CreateFromTask(async () => {
+            var stream = await ShowExportWindow.Handle(Unit.Default);
+            var writer = new StreamWriter(stream);
+            try {
+                await writer.WriteAsync(ConnectedDatabase.CollectionToCSV("CollectionTable"));
+                await writer.FlushAsync();
+            }
+            catch (IOException e) {
+                // Something is wrong with the file after it's been created.
+                Console.WriteLine(e.Message);
+            }
+
+            writer.Close();
+            stream.Close();
+        });
+        
         // Set up the ability to open the find window.
         ShowFindWindow = new Interaction<FindWindowViewModel, int>();
         var findEnabled = this.WhenAnyValue(x => x.CoinCollection.Count,
@@ -84,7 +102,7 @@ public class MainWindowViewModel : ViewModelBase {
             // Perhaps a secondary viewmodel?
             return new Coin();
         }, findEnabled);
-
+        
         // Subscribe to SidebarContent.OkCommand, which is an IObservable<(int, string, int)>
         // This is the same as the above, but with a different syntax.
         newViewModel.OkCommand

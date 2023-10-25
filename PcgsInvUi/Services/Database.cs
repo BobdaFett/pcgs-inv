@@ -121,6 +121,55 @@ public class Database {
         
         return coins;
     }
+
+    public String CollectionToCSV(string collectionName) {
+        var cmd = Connection.CreateCommand();
+        cmd.CommandText = $"SELECT * FROM {collectionName}";
+
+        var headersCommand = Connection.CreateCommand();
+        headersCommand.CommandText = $"PRAGMA table_info({collectionName})";
+        
+        var resultString = "";
+        var numHeaders = 0;
+        
+        // Get the headers.
+        using (var reader = headersCommand.ExecuteReader()) {
+            while (reader.Read()) {
+                resultString += reader.GetString(1) + ",";
+                numHeaders++;
+            }
+        }
+
+        resultString += "\n";
+
+        // Is there a more efficient way of doing this? This is running at O(n^2) time.
+        using (var reader = cmd.ExecuteReader()) {
+            while (reader.Read()) {
+                // Read information from the reader, then add to CSV string.
+                for (int i = 0; i < numHeaders; i++) {
+                    // Get the type of each column.
+                    var type = reader.GetFieldType(i);
+                    Console.WriteLine("Type: " + type);
+                    if (type == typeof(Int64)) {
+                        resultString += reader.GetInt32(i) + ",";
+                    }
+                    else if (type == typeof(Double)) {
+                        resultString += reader.GetDouble(i) + ",";
+                    }
+                    else if (type == typeof(String)) {
+                        resultString += reader.GetString(i) + ",";
+                    }
+                    else {
+                        resultString += "NULL" + ",";
+                    }
+                }
+
+                resultString += "\n";
+            }
+        }
+
+        return resultString;
+    }
     
     public Coin? GetCoin(int pcgsNumber, string grade) {
         // Get the coin based off of the pcgs number.
