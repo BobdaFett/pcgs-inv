@@ -13,7 +13,7 @@ namespace PcgsInvUi.ViewModels;
 // TODO Error handling.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
-// TODO Splash screen that loads.
+// TODO Splash screen during startup.
 // TODO Take giant sheet of coins to integrate into the application.
 // TODO Update all coins. Choose those that are older first.
 // TODO API request tracker (1000 per day)
@@ -28,7 +28,7 @@ public class MainWindowViewModel : ViewModelBase {
     }
     public ObservableCollection<Coin> CoinCollection { get; set; }
     public ObservableCollection<Coin> DisplayedList { get; set; }
-    public Database ConnectedDatabase { get; set; }
+    public CoinDatabase ConnectedCoinDatabase { get; set; }
     public Coin? SelectedCoin {
         get => _selectedCoin;
         set => this.RaiseAndSetIfChanged(ref _selectedCoin, value);
@@ -43,21 +43,21 @@ public class MainWindowViewModel : ViewModelBase {
     public ReactiveCommand<Unit, Coin> FindCommand { get; }
     public Interaction<FindWindowViewModel, int> ShowFindWindow { get; }
     public ReactiveCommand<Unit, Unit> ExportCommand { get; }
-    public Interaction<Unit, Stream> ShowExportWindow { get; }
+    public Interaction<Unit, Uri> ShowExportWindow { get; }
 
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
     private double _totalValue;
     private PcgsClient _pcgsClient;
-
-    // public MainWindowViewModel(CoinCollection coins) {
-    public MainWindowViewModel(Database coins) {
-        ConnectedDatabase = coins;
+    
+    public MainWindowViewModel(CoinDatabase coins) {
+        ConnectedCoinDatabase = coins;
         var newViewModel = new NewViewModel();
         _sideContent = newViewModel;
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
         DisplayedList = CoinCollection =
             new ObservableCollection<Coin>(coins.GetCollection("CollectionTable"));
+        TotalValue = DisplayedList.Sum(x => x.TotalPrice);
         _pcgsClient = new PcgsClient(
             "eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
 
@@ -69,26 +69,26 @@ public class MainWindowViewModel : ViewModelBase {
             var deleteViewModel = new DeleteWindowViewModel();
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
             if (result && SelectedCoin is not null) {
-                ConnectedDatabase.DeleteCoin(SelectedCoin);
+                ConnectedCoinDatabase.DeleteCoin(SelectedCoin);
                 CoinCollection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
             }
         }, deleteEnabled);
 
-        ShowExportWindow = new Interaction<Unit, Stream>();
+        ShowExportWindow = new Interaction<Unit, Uri>();
         ExportCommand = ReactiveCommand.CreateFromTask(async () => {
-            var stream = await ShowExportWindow.Handle(Unit.Default);
-            var writer = new StreamWriter(stream);
             try {
-                await writer.WriteAsync(ConnectedDatabase.CollectionToCSV("CollectionTable"));
+                var filePath = await ShowExportWindow.Handle(Unit.Default);
+                var stream = File.Open(filePath.AbsolutePath, FileMode.OpenOrCreate);
+                var writer = new StreamWriter(stream);
+                await writer.WriteAsync(ConnectedCoinDatabase.CollectionToCSV("CollectionTable"));
                 await writer.FlushAsync();
             }
             catch (IOException e) {
                 // Something is wrong with the file after it's been created.
                 Console.WriteLine(e.Message);
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
             }
-
-            writer.Close();
-            stream.Close();
         });
         
         // Set up the ability to open the find window.

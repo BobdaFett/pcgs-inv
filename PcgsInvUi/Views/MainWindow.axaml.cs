@@ -33,7 +33,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         interaction.SetOutput(result);
     }
 
-    public async Task ShowFilePickerAsync(InteractionContext<Unit, Stream> interationContext) {
+    public async Task ShowFilePickerAsync(InteractionContext<Unit, Uri> interationContext) {
         var topLevel = GetTopLevel(this);
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             Title = "Save CSV...",
@@ -44,10 +44,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         });
 
         Stream stream;
-        
+
         if (file is not null) {
-            stream = await file.OpenWriteAsync();
-            interationContext.SetOutput(stream);
+            interationContext.SetOutput(file.Path);
+        }
+        else {
+            // TODO Handle user closing the dialog.
+            throw new Exception("User cancelled the file picker.");
         }
     }
 }

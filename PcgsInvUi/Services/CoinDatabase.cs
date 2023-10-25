@@ -5,11 +5,11 @@ using PcgsInvUi.Models;
 
 namespace PcgsInvUi.Services;
 
-public class Database {
+public class CoinDatabase {
     public SQLiteConnection Connection { get; set; }
     private Boolean IsConnected { get; set; }
     
-    public Database() {
+    public CoinDatabase() {
         // Create a connection to SQLite
         Connection = CreateConnection();
         // Create a base table.

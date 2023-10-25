@@ -17,7 +17,7 @@ public partial class App : Application {
         base.OnFrameworkInitializationCompleted();
         
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
-            var coins = new Database();
+            var coins = new CoinDatabase();
 
             desktop.MainWindow = new MainWindow {
                 DataContext = new MainWindowViewModel(coins),
