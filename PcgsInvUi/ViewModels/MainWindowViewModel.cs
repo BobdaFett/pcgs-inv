@@ -40,8 +40,6 @@ public class MainWindowViewModel : ViewModelBase {
 
     public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
     public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
-    public ReactiveCommand<Unit, Coin> FindCommand { get; }
-    public Interaction<FindWindowViewModel, int> ShowFindWindow { get; }
     public ReactiveCommand<Unit, Unit> ExportCommand { get; }
     public Interaction<Unit, Uri> ShowExportWindow { get; }
 
@@ -90,18 +88,6 @@ public class MainWindowViewModel : ViewModelBase {
                 Console.WriteLine(e.Message);
             }
         });
-        
-        // Set up the ability to open the find window.
-        ShowFindWindow = new Interaction<FindWindowViewModel, int>();
-        var findEnabled = this.WhenAnyValue(x => x.CoinCollection.Count,
-            x => x > 0);
-        FindCommand = ReactiveCommand.CreateFromTask(async () => {
-            var findViewModel = new FindWindowViewModel();
-            var result = await ShowFindWindow.Handle(findViewModel);
-            // Find the coin with the matching ID. The issue is that there could be multiple - so we need to return a list.
-            // Perhaps a secondary viewmodel?
-            return new Coin();
-        }, findEnabled);
         
         // Subscribe to SidebarContent.OkCommand, which is an IObservable<(int, string, int)>
         // This is the same as the above, but with a different syntax.

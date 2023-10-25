@@ -65,9 +65,6 @@
                       DockPanel.Dock="Left">
                     <Button Grid.Column="0" Margin="5" Width="100" HorizontalContentAlignment="Center" Content="Delete"
                             Command="{Binding DeleteCommand}" />
-                    <!-- <Button Grid.Column="1" Margin="5" Width="100" HorizontalContentAlignment="Center" -->
-                    <!--         Content="Find..." -->
-                    <!--         Command="{Binding FindCommand}" /> -->
                 </Grid>
                 <Grid HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5" ColumnDefinitions="Auto, Auto"
                       DockPanel.Dock="Right">
