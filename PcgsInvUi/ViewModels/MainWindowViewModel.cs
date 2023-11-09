@@ -10,7 +10,7 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-// TODO Error handling.
+// TODO Error handling for API calls.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
 // TODO Splash screen during startup.
@@ -26,7 +26,6 @@ public class MainWindowViewModel : ViewModelBase {
         get => _sideContent;
         private set => this.RaiseAndSetIfChanged(ref _sideContent, value);
     }
-    public ObservableCollection<Coin> CoinCollection { get; set; }
     public ObservableCollection<Coin> DisplayedList { get; set; }
     public CoinDatabase ConnectedCoinDatabase { get; set; }
     public Coin? SelectedCoin {
@@ -53,12 +52,9 @@ public class MainWindowViewModel : ViewModelBase {
         var newViewModel = new NewViewModel();
         _sideContent = newViewModel;
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
-        DisplayedList = CoinCollection =
-            new ObservableCollection<Coin>(coins.GetCollection("CollectionTable"));
+        DisplayedList = ConnectedCoinDatabase.Collection;
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
-        _pcgsClient = new PcgsClient(
-            "eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
-
+        
         // Set up the ability to open the delete window.
         ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
         var deleteEnabled = this.WhenAnyValue(x => x.SelectedCoin)
@@ -68,7 +64,7 @@ public class MainWindowViewModel : ViewModelBase {
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
             if (result && SelectedCoin is not null) {
                 ConnectedCoinDatabase.DeleteCoin(SelectedCoin);
-                CoinCollection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
+                ConnectedCoinDatabase.Collection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
             }
         }, deleteEnabled);
 
@@ -93,16 +89,12 @@ public class MainWindowViewModel : ViewModelBase {
         // This is the same as the above, but with a different syntax.
         newViewModel.OkCommand
             .Subscribe(async requestStructure => {
-                var newCoin = await _pcgsClient.GetCoinFactsByGrade(requestStructure.Item1, requestStructure.Item2);
-                newCoin.Quantity = requestStructure.Item3;
-                CoinCollection.Add(newCoin);
-                coins.InsertCoin(newCoin);
-                TotalValue += newCoin.Quantity * newCoin.PriceGuideValue;
+                ConnectedCoinDatabase.CreateCoin(requestStructure.Item1, requestStructure.Item2, requestStructure.Item3);
             });
 
         // Change TotalValue anytime SelectedCoin.TotalPrice changes.
         // Possible null deref - ignored due to null values summing to 0.
         this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
-            .Subscribe(_ => TotalValue = CoinCollection.Sum(x => x.TotalPrice));
+            .Subscribe(_ => TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice));
     }
 }

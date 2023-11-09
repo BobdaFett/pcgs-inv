@@ -2,16 +2,22 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-// using Newtonsoft.Json;
 using PcgsInvUi.Models;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using ReactiveUI;
+
 
 namespace PcgsInvUi.Services;
 
-public class PcgsClient {
+public class PcgsClient : ReactiveObject {
+    public int NumApiRequests {
+        get => _numApiRequests;
+        set => this.RaiseAndSetIfChanged(ref _numApiRequests, value);
+    }
+    
     private string _apiUri = "https://api.pcgs.com/publicapi";
     private readonly string _apiKey;
+    private int _numApiRequests;
 
     public PcgsClient(string apiKey) {
         // _apiKey = apiKey;

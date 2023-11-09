@@ -14,7 +14,9 @@
             <Grid RowDefinitions="Auto, *">
                 <UserControl Grid.Row="0" Margin="10, 20, 10, 10" VerticalAlignment="Center"
                              Content="{Binding SidebarContent}" />
-                <TextBox Grid.Row="1" Margin="5" Watermark="Notes..." />
+                <TextBox Grid.Row="1" Margin="5" Watermark="Notes..."
+                         Text="{Binding SelectedCoin.Notes}"
+                         IsReadOnly="False" TextWrapping="Wrap"/>
             </Grid>
         </SplitView.Pane>
         <Grid RowDefinitions="*, Auto" ShowGridLines="False">
