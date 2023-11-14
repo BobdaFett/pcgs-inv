@@ -41,6 +41,7 @@ public class MainWindowViewModel : ViewModelBase {
     public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
     public ReactiveCommand<Unit, Unit> ExportCommand { get; }
     public Interaction<Unit, Uri> ShowExportWindow { get; }
+    public Interaction<Unit, Unit> ShowErrorWindow { get; }
 
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
@@ -54,6 +55,9 @@ public class MainWindowViewModel : ViewModelBase {
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
         DisplayedList = ConnectedCoinDatabase.Collection;
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
+        
+        // Set up the ability to show the error window.
+        ShowErrorWindow = new Interaction<Unit, Unit>();
         
         // Set up the ability to open the delete window.
         ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
@@ -89,7 +93,15 @@ public class MainWindowViewModel : ViewModelBase {
         // This is the same as the above, but with a different syntax.
         newViewModel.OkCommand
             .Subscribe(async requestStructure => {
-                ConnectedCoinDatabase.CreateCoin(requestStructure.Item1, requestStructure.Item2, requestStructure.Item3);
+                try {
+                    ConnectedCoinDatabase.CreateCoin(requestStructure.Item1, requestStructure.Item2,
+                        requestStructure.Item3);
+                }
+                catch (Exception e) {
+                    // TODO Error handling - create a popup window.
+                    Console.WriteLine(e.Message);
+                }
+                // TODO Clear the text boxes.
             });
 
         // Change TotalValue anytime SelectedCoin.TotalPrice changes.

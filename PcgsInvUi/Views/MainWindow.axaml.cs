@@ -53,4 +53,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
             throw new Exception("User cancelled the file picker.");
         }
     }
+    
+    public async Task ShowErrorWindowAsync(InteractionContext<Unit, Unit> interaction) {
+        var window = new ErrorWindow();
+        window.DataContext = interaction.Input;
+
+        await window.ShowDialog(this);
+    }
 }
