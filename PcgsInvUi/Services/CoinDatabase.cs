@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Data.SQLite;
+using System.Threading.Tasks;
 using PcgsInvUi.Models;
 
 namespace PcgsInvUi.Services;
@@ -109,9 +110,10 @@ public class CoinDatabase {
         
         // Execute the command.
         cmd.ExecuteNonQuery();
+        Console.WriteLine("Coin inserted.");
     }
 
-    public async void CreateCoin(int pcgsNumber, string grade, int quantity) {
+    public async Task<PcgsClient.ErrorType> CreateCoin(int pcgsNumber, string grade, int quantity) {
         Console.WriteLine("Creating coin...");
         // Create a coin by calling the API, then insert it into the database.
         // First, check if the coin already exists - if it does, just update the quantity by adding the amount entered.
@@ -119,13 +121,21 @@ public class CoinDatabase {
         if (coin is not null) {
             coin.Quantity += quantity;
             SaveCoin("CollectionTable", coin);
+            return PcgsClient.ErrorType.None;
         }
-        else {
-            // Build a new coin with the API and insert it.
-            var newCoin = await _pcgsClient.GetCoinFactsByGrade(pcgsNumber, grade);
+        
+        // Otherwise, build a new coin with the API and insert it.
+        var apiResult = await _pcgsClient.GetCoinFactsByGrade(pcgsNumber, grade);
+        if (apiResult.Item1 == PcgsClient.ErrorType.None) {
+            var newCoin = apiResult.Item2;
             newCoin.Quantity = quantity;
             InsertCoin(newCoin);
+            Collection.Add(newCoin);
+            return PcgsClient.ErrorType.None;
         }
+        
+        Console.WriteLine("Error getting coin from API - {0}", apiResult.Item1);
+        return apiResult.Item1;
     }
     
     public Coin? GetCoin(int pcgsNumber, string grade) {

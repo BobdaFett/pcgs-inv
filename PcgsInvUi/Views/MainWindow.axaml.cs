@@ -14,6 +14,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         InitializeComponent();
         this.WhenActivated(d => d(ViewModel!.ShowDeleteWindow.RegisterHandler(ShowDeleteWindowAsync)));
         this.WhenActivated(d => d(ViewModel!.ShowExportWindow.RegisterHandler(ShowFilePickerAsync)));
+        this.WhenActivated(d => d(ViewModel!.ShowErrorWindow.RegisterHandler(ShowErrorWindowAsync)));
         // this.WhenActivated(d => d(ViewModel!.ShowFindWindow.RegisterHandler(ShowFindWindowAsync)));
     }
 
@@ -54,7 +55,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         }
     }
     
-    public async Task ShowErrorWindowAsync(InteractionContext<Unit, Unit> interaction) {
+    public async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, Unit> interaction) {
         var window = new ErrorWindow();
         window.DataContext = interaction.Input;
 
