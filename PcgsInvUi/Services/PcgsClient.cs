@@ -11,6 +11,13 @@ using ReactiveUI;
 namespace PcgsInvUi.Services;
 
 public class PcgsClient : ReactiveObject {
+    public enum ErrorType {
+        None,
+        NoCoinFound,
+        InvalidRequestFormat,
+        ApiKeyInvalid
+    }
+    
     public int NumApiRequests {
         get => _numApiRequests;
         set => this.RaiseAndSetIfChanged(ref _numApiRequests, value);
@@ -26,7 +33,7 @@ public class PcgsClient : ReactiveObject {
             "E8xivTVN_k4Q8ubk8Xv_uU11U91WX0wDht4S4m4BAf2HPmKnGrZ0J2f9nccM7Ns1VkGoT1SXYR74I7aNaMKqXlJGEy3oobseKV0nGiqu1IKvFkOTVjhV37SWUVExSDFMC6FLzs7xJQIHwkcxr5JFOQNmc4ZytEh_-hmCN3NL-z0fEk98tzBmPJ_F7bq_xNru86QMD2A9yalu_dWe-lCysfyE2bCA2EDqwvWenRYf-0XnNtp6qlxxCMlCd-TDqqRKLC3qefCwpXSemwBiNSP5gbC9pwcKrZugkruuJ0nyxxThZymm";
     }
 
-    public async Task<Coin?> GetCoinFactsByGrade(int pcgsNumber, string grade, bool plusGrade = false) {
+    public async Task<(ErrorType, Coin?)> GetCoinFactsByGrade(int pcgsNumber, string grade, bool plusGrade = false) {
         Coin newCoin = null;
         using (HttpClient client = new HttpClient()) {
             var gradeParam = GetGradeFromString(grade);
@@ -40,15 +47,12 @@ public class PcgsClient : ReactiveObject {
 
             if (response.IsSuccessStatusCode) {
                 string jsonResponse = await response.Content.ReadAsStringAsync();
-                newCoin = ParseJsonResponse(jsonResponse);
-                Console.WriteLine("Coin created.");
-            }
-            else {
-                Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
+                var parsedResponse = ParseJsonResponse(jsonResponse);
+                return parsedResponse;
             }
         }
-
-        return newCoin;
+        
+        return (ErrorType.ApiKeyInvalid, null);
     }
 
     private int GetGradeFromString(string grade) {
@@ -59,14 +63,14 @@ public class PcgsClient : ReactiveObject {
 
     // TODO Will eventually create the other methods that are included in the Public API.
 
-    private Coin? ParseJsonResponse(string json) {
+    private (ErrorType, Coin?) ParseJsonResponse(string json) {
         Console.WriteLine(json);
         // TODO Check for errors in the response
-        if (json.Contains("\"ServerMessage\":\"No data found\"")) throw new CoinNotFoundException("No coin found with that PCGS number.");
-        if (json.Contains("\"IsValidRequest\":true")) throw new InvalidRequestFormatException("Invalid request format.");
+        if (json.Contains("\"ServerMessage\":\"No data found\"")) return (ErrorType.NoCoinFound, null);
+        if (json.Contains("\"IsValidRequest\":false")) return (ErrorType.InvalidRequestFormat, null);
 
         var newCoin = JsonSerializer.Deserialize<Coin>(json);
-        return newCoin;
+        return (ErrorType.None, newCoin);
     }
 }
 
