@@ -18,7 +18,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         // this.WhenActivated(d => d(ViewModel!.ShowFindWindow.RegisterHandler(ShowFindWindowAsync)));
     }
 
-    public async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, Boolean> interaction) {
+    private async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, Boolean> interaction) {
         var window = new DeleteWindow();
         window.DataContext = interaction.Input;
 
@@ -26,7 +26,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         interaction.SetOutput(result);
     }
 
-    public async Task ShowFindWindowAsync(InteractionContext<FindWindowViewModel, int> interaction) {
+    private async Task ShowFindWindowAsync(InteractionContext<FindWindowViewModel, int> interaction) {
         var window = new FindWindow();
         window.DataContext = interaction.Input;
 
@@ -34,7 +34,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         interaction.SetOutput(result);
     }
 
-    public async Task ShowFilePickerAsync(InteractionContext<Unit, Uri> interationContext) {
+    private async Task ShowFilePickerAsync(InteractionContext<Unit, Uri> interationContext) {
         var topLevel = GetTopLevel(this);
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             Title = "Save CSV...",
@@ -43,8 +43,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
             SuggestedFileName = "coins.csv",
             SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents)
         });
-
-        Stream stream;
 
         if (file is not null) {
             interationContext.SetOutput(file.Path);
@@ -55,10 +53,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         }
     }
     
-    public async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, Unit> interaction) {
+    private async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, Unit> interaction) {
         var window = new ErrorWindow();
         window.DataContext = interaction.Input;
 
         await window.ShowDialog(this);
+        interaction.SetOutput(Unit.Default);
     }
 }
