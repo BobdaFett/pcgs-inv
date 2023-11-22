@@ -1,22 +1,26 @@
-using System;
 using System.Reactive;
-using ReactiveUI;
+using System.Security.Principal;
 using PcgsInvUi.Views;
+using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels; 
 
 public class ErrorWindowViewModel : ViewModelBase {
 
-    public Exception DisplayedException {
+    public string DisplayedMessage {
         get => _message;
         set => this.RaiseAndSetIfChanged(ref _message, value);
     }
 
-    private Exception _message;
+    private string _message;
 
     public ReactiveCommand<ErrorWindow, Unit> CloseCommand { get; }
     
-    public ErrorWindowViewModel(string message) {
-        CloseCommand = ReactiveCommand.Create<ErrorWindow>(window => { window.Close(); });
+    public ErrorWindowViewModel(string message)
+    {
+        DisplayedMessage = message;
+
+        CloseCommand = ReactiveCommand.Create<ErrorWindow>(window => window.Close());
     }
+
 }

@@ -50,7 +50,7 @@
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="Est. Price" Width="*"
                                         Binding="{Binding PriceGuideValue}"
-                                        IsReadOnly="False" />
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="PCGS #" Width="*"
                                         Binding="{Binding PCGSNo}"
                                         IsReadOnly="True" />
