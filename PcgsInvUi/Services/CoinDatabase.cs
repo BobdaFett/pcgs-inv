@@ -36,9 +36,15 @@ public class CoinDatabase {
     }
 
     private SQLiteConnection CreateConnection() {
-        // Create a connection.
+        // Check if database exists.
+        if (!System.IO.File.Exists("%USERPROFILE%\\coin_collection")) {
+            // Create the database.
+            SQLiteConnection.CreateFile("%USERPROFILE%\\coin_collection");
+        }
+        
+        // Create a connection to the database.
         SQLiteConnection connection =
-            new SQLiteConnection("DataSource=C:\\Users\\lvas4\\coin_collection");
+            new SQLiteConnection("DataSource=%USERPROFILE%\\coin_collection");
         
         // Open the connection.
         try {
