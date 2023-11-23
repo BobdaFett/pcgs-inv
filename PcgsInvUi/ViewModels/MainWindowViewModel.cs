@@ -10,6 +10,7 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
+// TODO Create proper sums for total value.
 // TODO Error handling for API calls.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
@@ -41,7 +42,7 @@ public class MainWindowViewModel : ViewModelBase {
     public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
     public ReactiveCommand<Unit, Unit> ExportCommand { get; }
     public Interaction<Unit, Uri> ShowExportWindow { get; }
-    public Interaction<ErrorWindowViewModel, Unit> ShowErrorWindow { get; }
+    public Interaction<ErrorWindowViewModel, bool> ShowErrorWindow { get; }
 
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
@@ -56,7 +57,7 @@ public class MainWindowViewModel : ViewModelBase {
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
         
         // Set up the ability to show the error window.
-        ShowErrorWindow = new Interaction<ErrorWindowViewModel, Unit>();
+        ShowErrorWindow = new Interaction<ErrorWindowViewModel, bool>();
         
         // Set up the ability to open the delete window.
         ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
@@ -67,7 +68,7 @@ public class MainWindowViewModel : ViewModelBase {
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
             if (result && SelectedCoin is not null) {
                 ConnectedCoinDatabase.DeleteCoin(SelectedCoin);
-                ConnectedCoinDatabase.Collection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
+                ConnectedCoinDatabase.Collection.Remove(SelectedCoin);
             }
         }, deleteEnabled);
 
@@ -83,10 +84,10 @@ public class MainWindowViewModel : ViewModelBase {
             catch (IOException e) {
                 // Something is wrong with the file after it's been created.
                 Console.WriteLine(e.Message);
-                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+                await ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
-                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+                await ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
             }
         });
         
@@ -114,10 +115,15 @@ public class MainWindowViewModel : ViewModelBase {
                 
                 // TODO Clear the text boxes.
             });
-
-        // Change TotalValue anytime SelectedCoin.TotalPrice changes.
-        // Possible null deref - how do you remove this?
+        
+        // Update TotalValue anytime a coin's quantity changes.
+        // Possible null reference is currently ignored - SelectedCoin will never be null.
         this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
             .Subscribe(_ => TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice));
+
+        // Update TotalValue anytime a coin is added or removed.
+        ConnectedCoinDatabase.Collection.CollectionChanged += (sender, args) => {
+            TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice);
+        };
     }
 }

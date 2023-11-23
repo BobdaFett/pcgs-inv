@@ -18,7 +18,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         // this.WhenActivated(d => d(ViewModel!.ShowFindWindow.RegisterHandler(ShowFindWindowAsync)));
     }
 
-    private async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, Boolean> interaction) {
+    private async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, bool> interaction) {
         var window = new DeleteWindow();
         window.DataContext = interaction.Input;
 
@@ -53,11 +53,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
         }
     }
     
-    private async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, Unit> interaction) {
+    private async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, bool> interaction) {
         var window = new ErrorWindow();
         window.DataContext = interaction.Input;
 
-        await window.ShowDialog(this);
-        interaction.SetOutput(Unit.Default);
+        var result = await window.ShowDialog<bool>(this);
+        interaction.SetOutput(result);
     }
 }

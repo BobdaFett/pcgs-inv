@@ -5,8 +5,7 @@
         xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PcgsInvUi.Views.MainWindow" x:DataType="viewModels:MainWindowViewModel"
-        Title="Main Window"
-        WindowStartupLocation="CenterOwner">
+        Title="Main Window" WindowStartupLocation="CenterScreen" WindowState="Maximized" >
     <SplitView IsPaneOpen="True"
                DisplayMode="Inline"
                PanePlacement="Right">
@@ -49,7 +48,7 @@
                                         Binding="{Binding Designation}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="Est. Price" Width="*"
-                                        Binding="{Binding PriceGuideValue}"
+                                        Binding="{Binding PriceGuideValue, StringFormat='${0:0.00}'}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="PCGS #" Width="*"
                                         Binding="{Binding PCGSNo}"
