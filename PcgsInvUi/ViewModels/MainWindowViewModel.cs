@@ -10,6 +10,7 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
+// TODO Create proper sums for total value.
 // TODO Error handling for API calls.
 // TODO Manual handling of API key.
 // TODO Use CoinFacts link.
@@ -67,7 +68,7 @@ public class MainWindowViewModel : ViewModelBase {
             var result = await ShowDeleteWindow.Handle(deleteViewModel);
             if (result && SelectedCoin is not null) {
                 ConnectedCoinDatabase.DeleteCoin(SelectedCoin);
-                ConnectedCoinDatabase.Collection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
+                ConnectedCoinDatabase.Collection.Remove(SelectedCoin);
             }
         }, deleteEnabled);
 
@@ -83,10 +84,10 @@ public class MainWindowViewModel : ViewModelBase {
             catch (IOException e) {
                 // Something is wrong with the file after it's been created.
                 Console.WriteLine(e.Message);
-                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+                await ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
-                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+                await ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
             }
         });
         

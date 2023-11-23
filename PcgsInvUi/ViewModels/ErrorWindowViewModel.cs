@@ -18,7 +18,7 @@ public class ErrorWindowViewModel : ViewModelBase {
     
     public ErrorWindowViewModel(string message)
     {
-        DisplayedMessage = message;
+        _message = message;
 
         CloseCommand = ReactiveCommand.Create<ErrorWindow>(window => window.Close());
     }
