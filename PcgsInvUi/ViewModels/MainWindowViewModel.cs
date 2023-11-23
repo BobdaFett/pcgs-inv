@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using PcgsInvUi.Models;
 using PcgsInvUi.Services;
@@ -6,61 +10,114 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
-{
-    public CoinListViewModel List { get; }
-    private ViewModelBase _mainContent;
-    private ViewModelBase _sideContent;
-    
-    public MainWindowViewModel(CoinCollection coins)
-    {
-        List = new CoinListViewModel(coins.GetItems());
-        MainContent = List;
-    }
-    
-    public ViewModelBase MainContent
-    {
-        get => _mainContent;
-        private set => this.RaiseAndSetIfChanged(ref _mainContent, value);
-    }
+// TODO Error handling for API calls.
+// TODO Manual handling of API key.
+// TODO Use CoinFacts link.
+// TODO Splash screen during startup.
+// TODO Take giant sheet of coins to integrate into the application.
+// TODO Update all coins. Choose those that are older first.
+// TODO API request tracker (1000 per day)
+// TODO Ok button greys out while request is happening.
+// TODO Track when coins were last updated.
+// TODO Image for coin in notes view.
 
-    public ViewModelBase SidebarContent
-    {
+public class MainWindowViewModel : ViewModelBase {
+    public ViewModelBase SidebarContent {
         get => _sideContent;
         private set => this.RaiseAndSetIfChanged(ref _sideContent, value);
     }
+    public ObservableCollection<Coin> DisplayedList { get; set; }
+    public CoinDatabase ConnectedCoinDatabase { get; set; }
+    public Coin? SelectedCoin {
+        get => _selectedCoin;
+        set => this.RaiseAndSetIfChanged(ref _selectedCoin, value);
+    }
+    public double TotalValue {
+        get => _totalValue;
+        set => this.RaiseAndSetIfChanged(ref _totalValue, value);
+    }
 
-    public void AddItem()
-    {
+    public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
+    public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
+    public ReactiveCommand<Unit, Unit> ExportCommand { get; }
+    public Interaction<Unit, Uri> ShowExportWindow { get; }
+    public Interaction<ErrorWindowViewModel, Unit> ShowErrorWindow { get; }
+
+    private ViewModelBase _sideContent;
+    private Coin? _selectedCoin;
+    private double _totalValue;
+    
+    public MainWindowViewModel(CoinDatabase coins) {
+        ConnectedCoinDatabase = coins;
         var newViewModel = new NewViewModel();
+        _sideContent = newViewModel;
+        // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
+        DisplayedList = ConnectedCoinDatabase.Collection;
+        TotalValue = DisplayedList.Sum(x => x.TotalPrice);
+        
+        // Set up the ability to show the error window.
+        ShowErrorWindow = new Interaction<ErrorWindowViewModel, Unit>();
+        
+        // Set up the ability to open the delete window.
+        ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
+        var deleteEnabled = this.WhenAnyValue(x => x.SelectedCoin)
+            .Select(x => x != null);
+        DeleteCommand = ReactiveCommand.CreateFromTask(async () => {
+            var deleteViewModel = new DeleteWindowViewModel();
+            var result = await ShowDeleteWindow.Handle(deleteViewModel);
+            if (result && SelectedCoin is not null) {
+                ConnectedCoinDatabase.DeleteCoin(SelectedCoin);
+                ConnectedCoinDatabase.Collection.Remove(SelectedCoin); // possible null deref - ignored due to button being disabled.
+            }
+        }, deleteEnabled);
 
-        Observable.Merge(
-                newViewModel.OkCommand,
-                newViewModel.CancelCommand.Select(_ => (Coin?)null))
-            .Take(1)
-            .Subscribe(model =>
-            {
-                if (model != null)
-                    List.CoinCollection.Add(model);
-
-                MainContent = List;
+        ShowExportWindow = new Interaction<Unit, Uri>();
+        ExportCommand = ReactiveCommand.CreateFromTask(async () => {
+            try {
+                var filePath = await ShowExportWindow.Handle(Unit.Default);
+                var stream = File.Open(filePath.AbsolutePath, FileMode.OpenOrCreate);
+                var writer = new StreamWriter(stream);
+                await writer.WriteAsync(ConnectedCoinDatabase.CollectionToCSV("CollectionTable"));
+                await writer.FlushAsync();
+            }
+            catch (IOException e) {
+                // Something is wrong with the file after it's been created.
+                Console.WriteLine(e.Message);
+                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+            } catch (Exception e) {
+                Console.WriteLine(e.Message);
+                ShowErrorWindow.Handle(new ErrorWindowViewModel(e.Message));
+            }
+        });
+        
+        // Subscribe to SidebarContent.OkCommand, which is an IObservable<(int, string, int)>
+        // This is the same as the above, but with a different syntax.
+        newViewModel.OkCommand
+            .Subscribe(async requestStructure => {
+                var result = await ConnectedCoinDatabase.CreateCoin(requestStructure.Item1, requestStructure.Item2,
+                    requestStructure.Item3);
+                
+                switch (result) {
+                    case PcgsClient.ErrorType.ApiKeyInvalid:
+                        Console.WriteLine("API key is invalid - showing window.");
+                        await ShowErrorWindow.Handle(new ErrorWindowViewModel("API key is invalid - authorization failed."));
+                        break;
+                    case PcgsClient.ErrorType.InvalidRequestFormat:
+                        Console.WriteLine("Request format is invalid - showing window.");
+                        await ShowErrorWindow.Handle(new ErrorWindowViewModel("Request format is invalid."));
+                        break;
+                    case PcgsClient.ErrorType.NoCoinFound:
+                        Console.WriteLine("No coin was found with the given parameters.");
+                        await ShowErrorWindow.Handle(new ErrorWindowViewModel("No coin was found with the given parameters."));
+                        break;
+                }
+                
+                // TODO Clear the text boxes.
             });
-        
-        MainContent = newViewModel;
-    }
 
-    public void EditItem()
-    {
-        var editViewModel = new EditViewModel(List.SelectedCoin);
-    }
-
-    public void DeleteItem()
-    {
-        
-    }
-
-    public void FindItem()
-    {
-        
+        // Change TotalValue anytime SelectedCoin.TotalPrice changes.
+        // Possible null deref - how do you remove this?
+        this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
+            .Subscribe(_ => TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice));
     }
 }

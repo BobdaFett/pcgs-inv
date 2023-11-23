@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="150"
+        x:Class="PcgsInvUi.Views.ErrorWindow" x:DataType="viewModels:ErrorWindowViewModel"
+        Title="Error!" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner" 
+        x:Name="NameErrorWindow" CanResize="False" >
+    <Grid RowDefinitions="*,*">
+        <Label Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Stretch"
+               Margin="15"
+               Content="{Binding DisplayedMessage}" />
+        <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Margin="10" Name="CloseButton" IsEnabled="False"
+                Content="Use X button" Command="{Binding CloseCommand, Mode=OneWay}" 
+                CommandParameter="{Binding ElementName=NameErrorWindow}"/>
+    </Grid>
+</Window>

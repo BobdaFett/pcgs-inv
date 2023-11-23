@@ -1,28 +1,63 @@
-﻿using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+﻿using System;
+using System.IO;
+using System.Reactive;
+using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
+using Avalonia.ReactiveUI;
+using PcgsInvUi.ViewModels;
+using ReactiveUI;
 
 namespace PcgsInvUi.Views;
 
-public partial class MainWindow : Window
-{
-    // TODO New window.
-    // TODO Edit window.
-    // TODO Delete window.
-    // TODO Find window.
-    // TODO Export window.
-    // TODO Error handling.
-    // TODO Manual handling of API key.
-    // TODO Use CoinFacts link.
-    // TODO Export to CSV.
-    // TODO Take giant sheet of coins to integrate into the application.
-    // TODO Update all coins.
-    // TODO API request tracker (1000 per day)
-    // TODO API update schedules (per month? manual override? needs to store a date of last update in the coin object)
-
-    
-    public MainWindow()
-    {
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
+    public MainWindow() {
         InitializeComponent();
+        this.WhenActivated(d => d(ViewModel!.ShowDeleteWindow.RegisterHandler(ShowDeleteWindowAsync)));
+        this.WhenActivated(d => d(ViewModel!.ShowExportWindow.RegisterHandler(ShowFilePickerAsync)));
+        this.WhenActivated(d => d(ViewModel!.ShowErrorWindow.RegisterHandler(ShowErrorWindowAsync)));
+        // this.WhenActivated(d => d(ViewModel!.ShowFindWindow.RegisterHandler(ShowFindWindowAsync)));
+    }
+
+    private async Task ShowDeleteWindowAsync(InteractionContext<DeleteWindowViewModel, Boolean> interaction) {
+        var window = new DeleteWindow();
+        window.DataContext = interaction.Input;
+
+        var result = await window.ShowDialog<bool>(this);
+        interaction.SetOutput(result);
+    }
+
+    private async Task ShowFindWindowAsync(InteractionContext<FindWindowViewModel, int> interaction) {
+        var window = new FindWindow();
+        window.DataContext = interaction.Input;
+
+        var result = await window.ShowDialog<int>(this);
+        interaction.SetOutput(result);
+    }
+
+    private async Task ShowFilePickerAsync(InteractionContext<Unit, Uri> interationContext) {
+        var topLevel = GetTopLevel(this);
+        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
+            Title = "Save CSV...",
+            DefaultExtension = ".csv",
+            ShowOverwritePrompt = true,
+            SuggestedFileName = "coins.csv",
+            SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents)
+        });
+
+        if (file is not null) {
+            interationContext.SetOutput(file.Path);
+        }
+        else {
+            // TODO Handle user closing the dialog.
+            throw new Exception("User cancelled the file picker.");
+        }
+    }
+    
+    private async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, Unit> interaction) {
+        var window = new ErrorWindow();
+        window.DataContext = interaction.Input;
+
+        await window.ShowDialog(this);
+        interaction.SetOutput(Unit.Default);
     }
 }

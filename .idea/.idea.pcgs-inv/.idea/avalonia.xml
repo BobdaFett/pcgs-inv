@@ -6,6 +6,8 @@
         <entry key="PcgsInvUi/App.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/CoinListView.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/DeleteWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/ErrorWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/FindWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/MainWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/MainWindowOld.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/NewControl.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
