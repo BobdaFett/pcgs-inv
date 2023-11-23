@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using PcgsInvUi.Models;
 using ReactiveUI;
 
