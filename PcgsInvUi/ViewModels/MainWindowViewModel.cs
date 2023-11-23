@@ -42,7 +42,7 @@ public class MainWindowViewModel : ViewModelBase {
     public Interaction<DeleteWindowViewModel, Boolean> ShowDeleteWindow { get; }
     public ReactiveCommand<Unit, Unit> ExportCommand { get; }
     public Interaction<Unit, Uri> ShowExportWindow { get; }
-    public Interaction<ErrorWindowViewModel, Unit> ShowErrorWindow { get; }
+    public Interaction<ErrorWindowViewModel, bool> ShowErrorWindow { get; }
 
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
@@ -57,7 +57,7 @@ public class MainWindowViewModel : ViewModelBase {
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
         
         // Set up the ability to show the error window.
-        ShowErrorWindow = new Interaction<ErrorWindowViewModel, Unit>();
+        ShowErrorWindow = new Interaction<ErrorWindowViewModel, bool>();
         
         // Set up the ability to open the delete window.
         ShowDeleteWindow = new Interaction<DeleteWindowViewModel, bool>();
@@ -117,6 +117,7 @@ public class MainWindowViewModel : ViewModelBase {
             });
 
         // Change TotalValue anytime SelectedCoin.TotalPrice changes.
+        // TODO: fix this. Should update when a coin within the collection is changed.
         // Possible null deref - how do you remove this?
         this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
             .Subscribe(_ => TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice));
