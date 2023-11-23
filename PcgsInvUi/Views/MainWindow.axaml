@@ -48,7 +48,7 @@
                                         Binding="{Binding Designation}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="Est. Price" Width="*"
-                                        Binding="{Binding PriceGuideValue}"
+                                        Binding="{Binding PriceGuideValue, StringFormat='${0:0.00}'}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="PCGS #" Width="*"
                                         Binding="{Binding PCGSNo}"
