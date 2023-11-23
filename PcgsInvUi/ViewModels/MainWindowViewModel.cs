@@ -115,11 +115,15 @@ public class MainWindowViewModel : ViewModelBase {
                 
                 // TODO Clear the text boxes.
             });
-
-        // Change TotalValue anytime SelectedCoin.TotalPrice changes.
-        // TODO: fix this. Should update when a coin within the collection is changed.
-        // Possible null deref - how do you remove this?
+        
+        // Update TotalValue anytime a coin's quantity changes.
+        // Possible null reference is currently ignored - SelectedCoin will never be null.
         this.WhenAnyValue(x => x.SelectedCoin.TotalPrice)
             .Subscribe(_ => TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice));
+
+        // Update TotalValue anytime a coin is added or removed.
+        ConnectedCoinDatabase.Collection.CollectionChanged += (sender, args) => {
+            TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice);
+        };
     }
 }
