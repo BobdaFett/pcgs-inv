@@ -1,12 +1,9 @@
-using System;
-using System.Data.Entity.Migrations.Model;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using PcgsInvUi.Services;
 using PcgsInvUi.ViewModels;
 using PcgsInvUi.Views;
-using PcgsInvUi.Models;
 
 namespace PcgsInvUi;
 
@@ -20,17 +17,15 @@ public partial class App : Application {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             var coins = new CoinDatabase();
             desktop.MainWindow = new MainWindow {
-                DataContext = new MainWindowViewModel(coins),
+                DataContext = new MainWindowViewModel(),
             };
             
+            // Allow the application to save the database when it exits.
+            // The issue is that this will break if the database is not initialized here.
             desktop.Exit += (sender, args) => {
                 coins.UpdateCollection("CollectionTable");
             };
         }
         base.OnFrameworkInitializationCompleted();
-    }
-
-    public void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e) {
-        // Save the database?
     }
 }

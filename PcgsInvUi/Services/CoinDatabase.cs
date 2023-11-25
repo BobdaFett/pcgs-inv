@@ -16,15 +16,40 @@ public class CoinDatabase {
     public CoinDatabase() {
         // Create a connection to SQLite
         Connection = CreateConnection();
-        // Create a client to access the API.
-        _pcgsClient = new PcgsClient(
-            "eAb8gS0I2XAvT_5gJeiGJaglMia1Tk-oB4kJUK6kuafyrny_S61vIJY-Ikl4nCQM67wrdxzUqLVWTV2kBSxD3d5XNBHxHnYBhcSS6dOPug0hZaF3qAv56df3gYSzOGh9Tif5y0eP3Iw0LrqKDr1Hj-dk6SV6GKog2IIqCPQhhHH8FMTWBTYO-_O8cx7qLdM5GM8KlTsic6g3VRUhM8EA_4OO04dCfmNLGhqINRl3jGZ0Q4ziI8fng2bVWsIyteqiPzUn10rIQ3-OPpqVZG_DxeOmOejj4GzbUNyqUOajy-nr5rYY");
         // Create a base table.
         CreateCollection("CollectionTable");
+        CreateApiTable();
         Console.WriteLine("Connected to database.");
         Collection = new ObservableCollection<Coin>();
         GetCollection("CollectionTable");
         Console.WriteLine("Got collection.");
+
+        // Initialize the PCGS client. Must get the API key from the database.
+        // Check the database for an API key.
+        SQLiteCommand cmd = Connection.CreateCommand();
+        cmd.CommandText = "SELECT API_KEY FROM ApiTable";
+        using (var reader = cmd.ExecuteReader()) {
+            // If there's no API key, we need to get one from the user.
+            // Eventually there will be a window that pops up adking for the API key.
+            var apiKey = "";
+            if (reader.Read()) {
+                // Initialize the client.
+                apiKey = reader.GetString(0);
+            }
+            else {
+                // Get the API key from the user.
+                // TODO Create and open a window that asks for the API key.
+                // Since this needs to build before the main window is created, we can't do that yet.
+                Console.WriteLine("No API key found. Using default...");
+                do {
+                    // Console.Write("Enter a valid API key: ");
+                    // apiKey = Console.ReadLine();
+                    // Eventually we actually want to throw an error here.
+                    apiKey = "E8xivTVN_k4Q8ubk8Xv_uU11U91WX0wDht4S4m4BAf2HPmKnGrZ0J2f9nccM7Ns1VkGoT1SXYR74I7aNaMKqXlJGEy3oobseKV0nGiqu1IKvFkOTVjhV37SWUVExSDFMC6FLzs7xJQIHwkcxr5JFOQNmc4ZytEh_-hmCN3NL-z0fEk98tzBmPJ_F7bq_xNru86QMD2A9yalu_dWe-lCysfyE2bCA2EDqwvWenRYf-0XnNtp6qlxxCMlCd-TDqqRKLC3qefCwpXSemwBiNSP5gbC9pwcKrZugkruuJ0nyxxThZymm";
+                } while (apiKey == "" || apiKey == null);
+            }
+            _pcgsClient = new PcgsClient(apiKey);
+        }
     }
 
     ~CoinDatabase() {
@@ -38,9 +63,9 @@ public class CoinDatabase {
     private SQLiteConnection CreateConnection() {
         // Check if database exists.
         if (!System.IO.File.Exists("coin_collection")) {
-            // Create the database.
+            // If not, create the database.
             Console.Write("Creating database... ");
-            SQLiteConnection.CreateFile("coin_collection");
+            SQLiteConnection.CreateFile("coin_collection.sqlite");
             Console.WriteLine("Done.");
         }
         
@@ -58,6 +83,27 @@ public class CoinDatabase {
         }
 
         return connection;
+    }
+
+    public void CreateApiTable() {
+        // Create a table to store the API key and the number of requests remaining.
+        if (!IsConnected) {
+            // TODO Create a NotConnectedToDatabaseException
+            Console.WriteLine("Not connected to database.");
+            return;
+        }
+
+        // Create a SQL command.
+        SQLiteCommand cmd = Connection.CreateCommand();
+        cmd.CommandText =
+          "CREATE TABLE IF NOT EXISTS ApiTable (" +
+          "API_KEY TEXT, " +
+          "REQUESTS_REMAINING INTEGER, " + 
+          "PRIMARY KEY(API_KEY))";
+
+        // Execute the command
+        cmd.ExecuteNonQuery();
+        Console.WriteLine("API table initialized.");
     }
 
     public void CreateCollection(string collectionName) {
@@ -93,6 +139,7 @@ public class CoinDatabase {
         
         // Execute the command.
         cmd.ExecuteNonQuery();
+        Console.WriteLine("Collection table initialized.");
     }
 
     public void InsertCoin(Coin coin) {

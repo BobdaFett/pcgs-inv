@@ -10,18 +10,6 @@ using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
-// TODO Create proper sums for total value.
-// TODO Error handling for API calls.
-// TODO Manual handling of API key.
-// TODO Use CoinFacts link.
-// TODO Splash screen during startup.
-// TODO Take giant sheet of coins to integrate into the application.
-// TODO Update all coins. Choose those that are older first.
-// TODO API request tracker (1000 per day)
-// TODO Ok button greys out while request is happening.
-// TODO Track when coins were last updated.
-// TODO Image for coin in notes view.
-
 public class MainWindowViewModel : ViewModelBase {
     public ViewModelBase SidebarContent {
         get => _sideContent;
@@ -48,7 +36,7 @@ public class MainWindowViewModel : ViewModelBase {
     private Coin? _selectedCoin;
     private double _totalValue;
     
-    public MainWindowViewModel(CoinDatabase coins) {
+    public MainWindowViewModel(CoinDatabase coins, bool askForApiKey) {
         ConnectedCoinDatabase = coins;
         var newViewModel = new NewViewModel();
         _sideContent = newViewModel;
@@ -125,5 +113,12 @@ public class MainWindowViewModel : ViewModelBase {
         ConnectedCoinDatabase.Collection.CollectionChanged += (sender, args) => {
             TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice);
         };
+    }
+
+    // Create destructor to save the database when the application exits.
+    // This is necessary because the database is initialized in this class.
+    ~MainWindowViewModel() {
+        Console.WriteLine("Running MainWindowViewModel destructor.");
+        ConnectedCoinDatabase.UpdateCollection("CollectionTable");
     }
 }
