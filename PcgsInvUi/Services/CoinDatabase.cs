@@ -50,8 +50,17 @@ public class CoinDatabase {
         using (var reader = cmd.ExecuteReader()) {
             if (reader.Read()) {
                 var apiKey = reader.GetString(0);
-                _pcgsClient = new PcgsClient(apiKey);
+                _pcgsClient = PcgsClient.CreateClient(apiKey);
 
+                // Check that the client is valid.
+                if (_pcgsClient is null) {
+                    IsClientConnected = false;
+                    Console.WriteLine("Failed. API key was invalid.");
+                    return IsClientConnected;
+                }
+
+                // This only runs if the key is valid. Insert the key into the database.
+                // TODO Create checks to ensure that the database doesn't already contain a key.
                 var insertCmd = Connection.CreateCommand();
                 insertCmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUE ({apiKey}, 1000)";
                 insertCmd.ExecuteNonQuery();
@@ -69,12 +78,18 @@ public class CoinDatabase {
 
     public bool TryInitApiClient(string apiKey) {
         Console.Write("Attempting to initialize API client with key param... ");
-        _pcgsClient = new PcgsClient(apiKey);
+        _pcgsClient = PcgsClient.CreateClient(apiKey);
         // TODO Check if the API key is valid and if it is, then add to the database.
-        IsClientConnected = true;
+        if (_pcgsClient is null) {
+            IsClientConnected = false;
+            Console.WriteLine("Failed. API key was invalid.");
+            return IsClientConnected;
+        }
+
         var cmd = Connection.CreateCommand();
         cmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUES ({apiKey}, 1000)";
         // cmd.ExecuteNonQuery();
+        IsClientConnected = true;
         Console.WriteLine("Done!");
         return IsClientConnected;
     }
