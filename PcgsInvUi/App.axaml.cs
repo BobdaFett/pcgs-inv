@@ -17,7 +17,7 @@ public partial class App : Application {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             var coins = new CoinDatabase();
             desktop.MainWindow = new MainWindow {
-                DataContext = new MainWindowViewModel(),
+                DataContext = new MainWindowViewModel(coins, !coins.TryInitApiClient()),
             };
             
             // Allow the application to save the database when it exits.

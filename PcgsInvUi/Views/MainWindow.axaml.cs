@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -36,6 +35,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
 
     private async Task ShowFilePickerAsync(InteractionContext<Unit, Uri> interationContext) {
         var topLevel = GetTopLevel(this);
+        if (topLevel is null) throw new Exception("Could not find top level of the file path.");
         var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
             Title = "Save CSV...",
             DefaultExtension = ".csv",

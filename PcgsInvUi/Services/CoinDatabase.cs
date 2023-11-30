@@ -10,9 +10,14 @@ public class CoinDatabase {
     public SQLiteConnection Connection { get; set; }
     private Boolean IsConnected { get; set; }
     public ObservableCollection<Coin> Collection { get; set; }
+    public Boolean IsClientConnected { get; set; }
 
-    private PcgsClient _pcgsClient;
-
+    private PcgsClient? _pcgsClient;
+    
+    /// <summary>
+    /// Creates and initilizes a new instance of the CoinDatabase.
+    /// Must call TryInitApiClient() after creating a new instance.
+    /// </summary>
     public CoinDatabase() {
         // Create a connection to SQLite
         Connection = CreateConnection();
@@ -23,33 +28,6 @@ public class CoinDatabase {
         Collection = new ObservableCollection<Coin>();
         GetCollection("CollectionTable");
         Console.WriteLine("Got collection.");
-
-        // Initialize the PCGS client. Must get the API key from the database.
-        // Check the database for an API key.
-        SQLiteCommand cmd = Connection.CreateCommand();
-        cmd.CommandText = "SELECT API_KEY FROM ApiTable";
-        using (var reader = cmd.ExecuteReader()) {
-            // If there's no API key, we need to get one from the user.
-            // Eventually there will be a window that pops up adking for the API key.
-            var apiKey = "";
-            if (reader.Read()) {
-                // Initialize the client.
-                apiKey = reader.GetString(0);
-            }
-            else {
-                // Get the API key from the user.
-                // TODO Create and open a window that asks for the API key.
-                // Since this needs to build before the main window is created, we can't do that yet.
-                Console.WriteLine("No API key found. Using default...");
-                do {
-                    // Console.Write("Enter a valid API key: ");
-                    // apiKey = Console.ReadLine();
-                    // Eventually we actually want to throw an error here.
-                    apiKey = "E8xivTVN_k4Q8ubk8Xv_uU11U91WX0wDht4S4m4BAf2HPmKnGrZ0J2f9nccM7Ns1VkGoT1SXYR74I7aNaMKqXlJGEy3oobseKV0nGiqu1IKvFkOTVjhV37SWUVExSDFMC6FLzs7xJQIHwkcxr5JFOQNmc4ZytEh_-hmCN3NL-z0fEk98tzBmPJ_F7bq_xNru86QMD2A9yalu_dWe-lCysfyE2bCA2EDqwvWenRYf-0XnNtp6qlxxCMlCd-TDqqRKLC3qefCwpXSemwBiNSP5gbC9pwcKrZugkruuJ0nyxxThZymm";
-                } while (apiKey == "" || apiKey == null);
-            }
-            _pcgsClient = new PcgsClient(apiKey);
-        }
     }
 
     ~CoinDatabase() {
@@ -58,6 +36,32 @@ public class CoinDatabase {
         UpdateCollection("CollectionTable");
         // Close the connection.
         Connection.Close();
+    }
+    
+    /// <summary>
+    /// Attempts to intitialize the API client by selecting the API key from the database.
+    /// </summary>
+    /// <returns>True if the API key was found, false otherwise.</returns>
+    public bool TryInitApiClient() {
+        SQLiteCommand cmd = Connection.CreateCommand();
+        cmd.CommandText = "SELECT API_KEY FROM ApiTable";
+
+        using (var reader = cmd.ExecuteReader()) {
+            if (reader.Read()) {
+                var apiKey = reader.GetString(0);
+                _pcgsClient = new PcgsClient(apiKey);
+
+                var insertCmd = Connection.CreateCommand();
+                insertCmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUE ({apiKey}, 1000)";
+                insertCmd.ExecuteNonQuery();
+
+                IsClientConnected = true;
+            }
+            else {
+                IsClientConnected = false;
+            }
+        }
+        return IsClientConnected;
     }
 
     private SQLiteConnection CreateConnection() {
