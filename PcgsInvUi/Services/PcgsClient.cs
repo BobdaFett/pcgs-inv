@@ -31,7 +31,6 @@ public class PcgsClient : ReactiveObject {
     }
 
     public async Task<(ErrorType, Coin?)> GetCoinFactsByGrade(int pcgsNumber, string grade, bool plusGrade = false) {
-        Coin newCoin = null;
         using (HttpClient client = new HttpClient()) {
             var gradeParam = GetGradeFromString(grade);
 

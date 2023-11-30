@@ -40,9 +40,7 @@ public class NewViewModel : ViewModelBase {
             okEnabled);
 
         ClearCommand = ReactiveCommand.Create(() => {
-            PcgsNumber = "";
-            Grade = "";
-            Quantity = "";
+            ClearText();
         });
 
         // Initialize grade values for use in the view.
@@ -83,4 +81,13 @@ public class NewViewModel : ViewModelBase {
 
     public ReactiveCommand<Unit, (int, string, int)> OkCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearCommand { get; }
+
+    /// <summary>
+    /// Clears the text fields.
+    /// </summary>
+    public void ClearText() {
+        PcgsNumber = "";
+        Grade = "";
+        Quantity = "";
+    }
 }

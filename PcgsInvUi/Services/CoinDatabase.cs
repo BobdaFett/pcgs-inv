@@ -43,6 +43,7 @@ public class CoinDatabase {
     /// </summary>
     /// <returns>True if the API key was found, false otherwise.</returns>
     public bool TryInitApiClient() {
+        Console.Write("Attempting to initialize API client... ");
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText = "SELECT API_KEY FROM ApiTable";
 
@@ -56,11 +57,25 @@ public class CoinDatabase {
                 insertCmd.ExecuteNonQuery();
 
                 IsClientConnected = true;
+                Console.WriteLine("Done!");
             }
             else {
                 IsClientConnected = false;
+                Console.WriteLine("Failed. API key not found.");
             }
         }
+        return IsClientConnected;
+    }
+
+    public bool TryInitApiClient(string apiKey) {
+        Console.Write("Attempting to initialize API client with key param... ");
+        _pcgsClient = new PcgsClient(apiKey);
+        // TODO Check if the API key is valid and if it is, then add to the database.
+        IsClientConnected = true;
+        var cmd = Connection.CreateCommand();
+        cmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUES ({apiKey}, 1000)";
+        // cmd.ExecuteNonQuery();
+        Console.WriteLine("Done!");
         return IsClientConnected;
     }
 
