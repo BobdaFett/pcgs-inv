@@ -2,7 +2,7 @@
 A coin collection inventory app, written in C# with the Avalonia UI framework utilizing the PCGS Public API.
 
 # Requirements
-[.NET Core >= 6](https://dotnet.microsoft.com/en-us/download) - you will be prompted for install before running the program if it is not installed.
+[.NET Runtime >= 6](https://dotnet.microsoft.com/en-us/download) - you will be prompted for install before running the program if it is not installed.
 
 # Install
 Extract contents of the downloaded file to an accessible folder (ie. Documents/PCGSApp)
