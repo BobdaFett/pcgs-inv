@@ -4,6 +4,7 @@
     <option name="projectPerEditor">
       <map>
         <entry key="PcgsInvUi/App.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
+        <entry key="PcgsInvUi/Views/ApiKeyView.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/CoinListView.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/DeleteWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />
         <entry key="PcgsInvUi/Views/ErrorWindow.axaml" value="PcgsInvUi/PcgsInvUi.csproj" />

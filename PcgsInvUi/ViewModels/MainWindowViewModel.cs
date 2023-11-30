@@ -39,10 +39,24 @@ public class MainWindowViewModel : ViewModelBase {
     public MainWindowViewModel(CoinDatabase coins, bool askForApiKey) {
         ConnectedCoinDatabase = coins;
         var newViewModel = new NewViewModel();
-        _sideContent = newViewModel;
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
         DisplayedList = ConnectedCoinDatabase.Collection;
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
+
+        // Setup interaction to show ApiKeyWindow
+        // Check if API key must be entered.
+        if (askForApiKey) {
+            Console.WriteLine("API key must be entered by user.");
+            // Show the API key input view.
+            var apiKeyViewModel = new ApiKeyViewModel();
+            _sideContent = apiKeyViewModel;
+            // Subscribe to the OkCommand in the ApiKeyViewModel.
+            apiKeyViewModel.OkCommand
+                .Subscribe(apiKey => {
+                    // Attempt to connect to the PCGS API and set view accordingly.
+                    if (ConnectedCoinDatabase.TryInitApiClient()) _sideContent = newViewModel;
+                });
+        } else _sideContent = newViewModel;
         
         // Set up the ability to show the error window.
         ShowErrorWindow = new Interaction<ErrorWindowViewModel, bool>();
