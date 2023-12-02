@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using PcgsInvUi.Models;
 using PcgsInvUi.Services;
 using ReactiveUI;
+using System.Threading.Tasks;
 
 namespace PcgsInvUi.ViewModels;
 
@@ -35,9 +36,11 @@ public class MainWindowViewModel : ViewModelBase {
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
     private double _totalValue;
-    
-    public MainWindowViewModel(CoinDatabase coins, bool askForApiKey) {
+
+    public MainWindowViewModel(CoinDatabase coins) {
         ConnectedCoinDatabase = coins;
+        var keyFound = Task.Run(() => coins.TryInitApiClient()).Result;
+        Console.WriteLine("Function completed.");
         var newViewModel = new NewViewModel();
         var apiKeyViewModel = new ApiKeyViewModel();
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
@@ -45,13 +48,13 @@ public class MainWindowViewModel : ViewModelBase {
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
 
         // Setup interaction to show ApiKeyWindow
-        apiKeyViewModel.OkCommand.Subscribe(apiKey => {
-            if (ConnectedCoinDatabase.TryInitApiClient(apiKey))
-                SidebarContent = newViewModel;  // Must assign this to the observable property.
+        apiKeyViewModel.OkCommand.Subscribe(async apiKey => {
+            if (await ConnectedCoinDatabase.TryInitApiClient(apiKey))
+                SidebarContent = newViewModel;  // Must assign this to the observable property rather than private variable.
             });
 
         // Check if API key must be entered.
-        if (askForApiKey) {
+        if (!keyFound) {
             Console.WriteLine("API key must be entered by user.");
             // Show the API key input view.
             _sideContent = apiKeyViewModel;

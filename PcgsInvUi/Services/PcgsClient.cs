@@ -39,18 +39,19 @@ public class PcgsClient : ReactiveObject {
     /// </summary>
     /// <param name="apiKey">The api key to use for requests.</param>
     /// <returns>A new instance of the PcgsClient class, or null if the key is invalid.</returns>
-    public static PcgsClient? CreateClient(string apiKey) {
+    public static async Task<PcgsClient?> CreateClient(string apiKey) {
         // Check if the api key is valid.
         var testClient = new PcgsClient(apiKey);
-        if (!testClient.VerifyCredentials()) return null;
+        var validCreds = await testClient.VerifyCredentials();
+        if (!validCreds) return null;
         return testClient;
     }
 
-    public bool VerifyCredentials() {
+    public async Task<bool> VerifyCredentials() {
         // Create a way to check if the api key given is valid
         // I think the best way to do this is to make a request to the api and see if it returns the expected response.
-        var result = this.GetCoinFactsByGrade(1, "1");  // This is a known invalid coin id - this is because the api is very fast with invalid requests.
-        if (result.Result.Item1 == ErrorType.ApiKeyInvalid) return false;
+        var result = await this.GetCoinFactsByGrade(1, "AG-03");  // This is a known invalid coin id - this is because the api is very fast with invalid requests.
+        if (result.Item1 == ErrorType.ApiKeyInvalid) return false;
         return true;
     }
 
@@ -66,6 +67,7 @@ public class PcgsClient : ReactiveObject {
             Console.WriteLine("Got response.");
 
             if (response.IsSuccessStatusCode) {
+                // Check response for errors.
                 string jsonResponse = await response.Content.ReadAsStringAsync();
                 var parsedResponse = ParseJsonResponse(jsonResponse);
                 return parsedResponse;
@@ -76,12 +78,10 @@ public class PcgsClient : ReactiveObject {
     }
 
     private int GetGradeFromString(string grade) {
-        var actualGrade = int.Parse(grade.Substring(grade.Length - 2));
+        var actualGrade = int.Parse(grade.Substring(grade.Length - 2));  // Throws an exception if the grade doesn't exist.
         Console.WriteLine($"Grade is {actualGrade}");
         return actualGrade;
     }
-
-    // TODO Will eventually create the other methods that are included in the Public API.
 
     private (ErrorType, Coin?) ParseJsonResponse(string json) {
         Console.WriteLine(json);

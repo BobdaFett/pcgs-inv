@@ -30,6 +30,9 @@ public class CoinDatabase {
         Console.WriteLine("Got collection.");
     }
 
+    /// <summary>
+    /// Destructor. Currently not used, due to the strange nature of desktop applications.
+    /// </summary>
     ~CoinDatabase() {
         Console.WriteLine("Destructor called, saving collection.");
         // Save collection.
@@ -42,7 +45,7 @@ public class CoinDatabase {
     /// Attempts to intitialize the API client by selecting the API key from the database.
     /// </summary>
     /// <returns>True if the API key was found, false otherwise.</returns>
-    public bool TryInitApiClient() {
+    public async Task<bool> TryInitApiClient() {
         Console.Write("Attempting to initialize API client... ");
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText = "SELECT API_KEY FROM ApiTable";
@@ -50,7 +53,7 @@ public class CoinDatabase {
         using (var reader = cmd.ExecuteReader()) {
             if (reader.Read()) {
                 var apiKey = reader.GetString(0);
-                _pcgsClient = PcgsClient.CreateClient(apiKey);
+                _pcgsClient = await PcgsClient.CreateClient(apiKey);
 
                 // Check that the client is valid.
                 if (_pcgsClient is null) {
@@ -59,14 +62,8 @@ public class CoinDatabase {
                     return IsClientConnected;
                 }
 
-                // This only runs if the key is valid. Insert the key into the database.
-                // TODO Create checks to ensure that the database doesn't already contain a key.
-                var insertCmd = Connection.CreateCommand();
-                insertCmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUE ({apiKey}, 1000)";
-                insertCmd.ExecuteNonQuery();
-
                 IsClientConnected = true;
-                Console.WriteLine("Done!");
+                Console.WriteLine("Done! API key was found from database.");
             }
             else {
                 IsClientConnected = false;
@@ -76,9 +73,13 @@ public class CoinDatabase {
         return IsClientConnected;
     }
 
-    public bool TryInitApiClient(string apiKey) {
+    /// <summary>
+    /// Atttempts to initialize the PCGS API client.
+    /// </summary>
+    /// <returns>A Task with a return value that returns true if the client intializes properly.</returns>
+    public async Task<bool> TryInitApiClient(string apiKey) {
         Console.Write("Attempting to initialize API client with key param... ");
-        _pcgsClient = PcgsClient.CreateClient(apiKey);
+        _pcgsClient = await PcgsClient.CreateClient(apiKey);
         // TODO Check if the API key is valid and if it is, then add to the database.
         if (_pcgsClient is null) {
             IsClientConnected = false;
@@ -87,13 +88,19 @@ public class CoinDatabase {
         }
 
         var cmd = Connection.CreateCommand();
-        cmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUES ({apiKey}, 1000)";
-        // cmd.ExecuteNonQuery();
+        cmd.CommandText = $"INSERT INTO ApiTable (API_KEY, REQUESTS_REMAINING) VALUES (\"{apiKey}\", 1000)";
+        await cmd.ExecuteNonQueryAsync();
+
         IsClientConnected = true;
-        Console.WriteLine("Done!");
+        Console.WriteLine("Done! API key was added to database.");
         return IsClientConnected;
     }
 
+    /// <summary>
+    /// Gets the collection from the database and stores it in the Collection property.
+    /// Creates the collection table if it does not exist already.
+    /// </summary>
+    /// <returns>The SQLiteConnection that corresponds to the connected database.</returns>
     private SQLiteConnection CreateConnection() {
         // Check if database exists.
         if (!System.IO.File.Exists("coin_collection")) {
@@ -119,6 +126,9 @@ public class CoinDatabase {
         return connection;
     }
 
+    /// <summary>
+    /// Creates the table that stores the API key and the number of requests remaining.
+    /// </summary>
     public void CreateApiTable() {
         // Create a table to store the API key and the number of requests remaining.
         if (!IsConnected) {
@@ -176,6 +186,9 @@ public class CoinDatabase {
         Console.WriteLine("Collection table initialized.");
     }
 
+    /// <summary>
+    /// Inserts a Coin object into the database.
+    /// </summary>
     public void InsertCoin(Coin coin) {
         Console.WriteLine("Inserting coin...");
         // Use our existing connection to insert a coin to the database.
@@ -202,6 +215,13 @@ public class CoinDatabase {
         Console.WriteLine("Coin inserted.");
     }
 
+    /// <summary>
+    /// Creates a Coin object and saves it to the database.
+    /// </summary>
+    /// <param name="pcgsNumber">The PCGS number of the coin.</param>
+    /// <param name="grade">The grade of the coin.</param>
+    /// <param name="quantity">The quantity of the coin.</param>
+    /// <returns>The error type returned by the API.</returns>
     public async Task<PcgsClient.ErrorType> CreateCoin(int pcgsNumber, string grade, int quantity) {
         Console.WriteLine("Creating coin...");
         // Create a coin by calling the API, then insert it into the database.
@@ -227,6 +247,12 @@ public class CoinDatabase {
         return apiResult.Item1;
     }
     
+    /// <summary>
+    /// Gets a coin from the database.
+    /// </summary>
+    /// <param name="pcgsNumber">The PCGS number of the coin.</param>
+    /// <param name="grade">The grade of the coin.</param>
+    /// <returns>The coin if it exists, null otherwise.</returns>
     public Coin? GetCoin(int pcgsNumber, string grade) {
         Console.WriteLine($"Getting coin {pcgsNumber}, {grade}...");
         int gradeInt = GetGradeFromString(grade);
@@ -246,6 +272,10 @@ public class CoinDatabase {
         return null;
     }
 
+    /// <summary>
+    /// Used to get all Coin objects within the database.
+    /// </summary>
+    /// <param name="collectionName">The name of the collection table.</param>
     public void GetCollection(string collectionName) {
         Console.WriteLine("Getting collection...");
         SQLiteCommand cmd = Connection.CreateCommand();
@@ -259,6 +289,11 @@ public class CoinDatabase {
         }
     }
 
+    /// <summary>
+    /// Creates a CSV formatted string from a collection.
+    /// </summary>
+    /// <param name="collectionName">The name of the collection table.</param>
+    /// <returns>A CSV formatted string.</returns>
     public String CollectionToCSV(string collectionName) {
         var cmd = Connection.CreateCommand();
         cmd.CommandText = $"SELECT * FROM {collectionName}";
@@ -307,6 +342,11 @@ public class CoinDatabase {
         return resultString;
     }
 
+    /// <summary>
+    /// Saves a Coin object to the database.
+    /// </summary>
+    /// <param name="collectionName">The name of the collection table.</param>
+    /// <param name="coin">The coin to save.</param>
     public void SaveCoin(string collectionName, Coin coin) {
         // Get and replace the coin from the database.
         Console.WriteLine("Saving coin...");
@@ -333,6 +373,10 @@ public class CoinDatabase {
         cmd.ExecuteNonQuery();
     }
 
+    /// <summary>
+    /// Synchronizes the database with the current contents of the specified collection.
+    /// </summary>
+    /// <param name="collectionName">The name of the collection table.</param>
     public void UpdateCollection(string collectionName) {
         // Update the database with the contents of the collection.
         // TODO This is a very inefficient way of doing this. I should be able to do this in one command.
@@ -341,6 +385,10 @@ public class CoinDatabase {
         }
     }
     
+    /// <summary>
+    /// Creates a Coin from the information in a reader specifically from this database.
+    /// </summary>
+    /// <param name="reader">The reader to get the information from.</param>
     private Coin CoinFromReader(SQLiteDataReader reader) {
         // Create a coin while filtering out any possible null values - they throw exceptions.
         Coin coin = new Coin();
@@ -364,6 +412,10 @@ public class CoinDatabase {
         return coin;
     }
     
+    /// <summary>
+    /// Deletes a Coin object from the database.
+    /// </summary>
+    /// <param name="delCoin">The coin to delete.</param>
     public void DeleteCoin(Coin delCoin) {
         SQLiteCommand cmd = Connection.CreateCommand();
         cmd.CommandText = "DELETE FROM CollectionTable WHERE PCGS_NUMBER = @PcgsNumber AND GRADE = @Grade";
@@ -373,6 +425,11 @@ public class CoinDatabase {
         cmd.ExecuteNonQuery();
     }
     
+    /// <summary>
+    /// Gets the grade from a string returned from the main window.
+    /// These are always in a format similar to "MS-65", so we can just get the last two characters.
+    /// </summary>
+    /// <param name="grade">The grade string.</param>
     private int GetGradeFromString(string grade) {
         var actualGrade = int.Parse(grade.Substring(grade.Length - 2));
         Console.WriteLine($"Grade is {actualGrade}");

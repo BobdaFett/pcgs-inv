@@ -17,11 +17,10 @@ public partial class App : Application {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             var coins = new CoinDatabase();
             desktop.MainWindow = new MainWindow {
-                DataContext = new MainWindowViewModel(coins, !coins.TryInitApiClient()),
+                DataContext = new MainWindowViewModel(coins),
             };
             
             // Allow the application to save the database when it exits.
-            // The issue is that this will break if the database is not initialized here.
             desktop.Exit += (sender, args) => {
                 coins.UpdateCollection("CollectionTable");
             };
