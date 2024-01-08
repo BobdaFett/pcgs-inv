@@ -1,12 +1,9 @@
-using System;
-using System.Data.Entity.Migrations.Model;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using PcgsInvUi.Services;
 using PcgsInvUi.ViewModels;
 using PcgsInvUi.Views;
-using PcgsInvUi.Models;
 
 namespace PcgsInvUi;
 
@@ -23,14 +20,11 @@ public partial class App : Application {
                 DataContext = new MainWindowViewModel(coins),
             };
             
+            // Allow the application to save the database when it exits.
             desktop.Exit += (sender, args) => {
                 coins.UpdateCollection("CollectionTable");
             };
         }
         base.OnFrameworkInitializationCompleted();
-    }
-
-    public void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e) {
-        // Save the database?
     }
 }

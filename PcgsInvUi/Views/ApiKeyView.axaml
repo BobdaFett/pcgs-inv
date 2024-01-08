@@ -1,0 +1,14 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="PcgsInvUi.Views.ApiKeyView" x:DataType="viewModels:ApiKeyViewModel" >
+    <StackPanel>
+        <Label Content="API key was not found or did not authenticate." /> 
+        <Label Content="Please enter your API key below:" />
+        <TextBox Margin="10" Text="{Binding ApiKeyInput}" />
+        <Button HorizontalAlignment="Center" Content="Submit" Command="{Binding OkCommand}" />
+    </StackPanel>
+</UserControl>

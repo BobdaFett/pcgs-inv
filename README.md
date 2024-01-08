@@ -2,7 +2,7 @@
 A coin collection inventory app, written in C# with the Avalonia UI framework utilizing the PCGS Public API.
 
 # Requirements
-[.NET Core >= 6](https://dotnet.microsoft.com/en-us/download) - you will be prompted for install before running the program if it is not installed.
+[.NET Runtime >= 6](https://dotnet.microsoft.com/en-us/download) - you will be prompted for install before running the program if it is not installed.
 
 # Install
 Extract contents of the downloaded file to an accessible folder (ie. Documents/PCGSApp)
@@ -26,3 +26,12 @@ in the lower right corner) will update automatically.
 
 To export into a CSV file, click the Export to CSV button in the lower right corner. This will allow you to choose a
 location and name for the file. These files are usable with any application that can open a .csv file, like Excel.
+
+# Contributions
+
+If you would like to help development, and don't mind looking through my spaghetti code (I'm still learning how to structure this)
+then feel free to submit a pull request! I'm happy to take any help that I can get.
+
+I've just started utilizing makefiles, however, since I'm currently using Windows, I'm not completely sure if there are formatting
+changes that should be made to that. I will leave makefile creation for other platforms up to someone that uses these other
+operating systems for now.

@@ -7,20 +7,9 @@ using System.Reactive.Linq;
 using PcgsInvUi.Models;
 using PcgsInvUi.Services;
 using ReactiveUI;
+using System.Threading.Tasks;
 
 namespace PcgsInvUi.ViewModels;
-
-// TODO Create proper sums for total value.
-// TODO Error handling for API calls.
-// TODO Manual handling of API key.
-// TODO Use CoinFacts link.
-// TODO Splash screen during startup.
-// TODO Take giant sheet of coins to integrate into the application.
-// TODO Update all coins. Choose those that are older first.
-// TODO API request tracker (1000 per day)
-// TODO Ok button greys out while request is happening.
-// TODO Track when coins were last updated.
-// TODO Image for coin in notes view.
 
 public class MainWindowViewModel : ViewModelBase {
     public ViewModelBase SidebarContent {
@@ -47,14 +36,29 @@ public class MainWindowViewModel : ViewModelBase {
     private ViewModelBase _sideContent;
     private Coin? _selectedCoin;
     private double _totalValue;
-    
+
     public MainWindowViewModel(CoinDatabase coins) {
         ConnectedCoinDatabase = coins;
+        var keyFound = Task.Run(() => coins.TryInitApiClient()).Result;
+        Console.WriteLine("Function completed.");
         var newViewModel = new NewViewModel();
-        _sideContent = newViewModel;
+        var apiKeyViewModel = new ApiKeyViewModel();
         // DisplayedList = CoinCollection = new ObservableCollection<Coin>(coins.GetItems());
         DisplayedList = ConnectedCoinDatabase.Collection;
         TotalValue = DisplayedList.Sum(x => x.TotalPrice);
+
+        // Setup interaction to show ApiKeyWindow
+        apiKeyViewModel.OkCommand.Subscribe(async apiKey => {
+            if (await ConnectedCoinDatabase.TryInitApiClient(apiKey))
+                SidebarContent = newViewModel;  // Must assign this to the observable property rather than private variable.
+            });
+
+        // Check if API key must be entered.
+        if (!keyFound) {
+            Console.WriteLine("API key must be entered by user.");
+            // Show the API key input view.
+            _sideContent = apiKeyViewModel;
+        } else _sideContent = newViewModel;
         
         // Set up the ability to show the error window.
         ShowErrorWindow = new Interaction<ErrorWindowViewModel, bool>();
@@ -113,7 +117,8 @@ public class MainWindowViewModel : ViewModelBase {
                         break;
                 }
                 
-                // TODO Clear the text boxes.
+                // Clear the text boxes.
+                newViewModel.ClearText();
             });
         
         // Update TotalValue anytime a coin's quantity changes.
@@ -125,5 +130,12 @@ public class MainWindowViewModel : ViewModelBase {
         ConnectedCoinDatabase.Collection.CollectionChanged += (sender, args) => {
             TotalValue = ConnectedCoinDatabase.Collection.Sum(x => x.TotalPrice);
         };
+    }
+
+    // Create destructor to save the database when the application exits.
+    // This is necessary because the database is initialized in this class.
+    ~MainWindowViewModel() {
+        Console.WriteLine("Running MainWindowViewModel destructor.");
+        ConnectedCoinDatabase.UpdateCollection("CollectionTable");
     }
 }
