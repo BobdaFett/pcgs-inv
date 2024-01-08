@@ -76,11 +76,12 @@ public class CoinDatabase {
     /// <summary>
     /// Atttempts to initialize the PCGS API client.
     /// </summary>
+    /// <param name=apiKey>The API key to verify.</param>
     /// <returns>A Task with a return value that returns true if the client intializes properly.</returns>
     public async Task<bool> TryInitApiClient(string apiKey) {
         Console.Write("Attempting to initialize API client with key param... ");
         _pcgsClient = await PcgsClient.CreateClient(apiKey);
-        // TODO Check if the API key is valid and if it is, then add to the database.
+        // Check if the API key is valid and if it is, then add to the database.
         if (_pcgsClient is null) {
             IsClientConnected = false;
             Console.WriteLine("Failed. API key was invalid.");
@@ -150,6 +151,9 @@ public class CoinDatabase {
         Console.WriteLine("API table initialized.");
     }
 
+    /// <summary>
+    /// Creates a table to store the collection.
+    /// </summary>
     public void CreateCollection(string collectionName) {
         // Create a table to store the collection.
         if (!IsConnected) {
@@ -435,4 +439,8 @@ public class CoinDatabase {
         Console.WriteLine($"Grade is {actualGrade}");
         return actualGrade;
     }
+}
+
+public class NotConnectedToDatabaseException : Exception {
+    public NotConnectedToDatabaseException() : base("Not connected to database.") { }
 }

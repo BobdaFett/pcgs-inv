@@ -31,7 +31,6 @@ public class PcgsClient : ReactiveObject {
     /// </summary>
     private PcgsClient(string apiKey) {
         _apiKey = apiKey;
-            // "E8xivTVN_k4Q8ubk8Xv_uU11U91WX0wDht4S4m4BAf2HPmKnGrZ0J2f9nccM7Ns1VkGoT1SXYR74I7aNaMKqXlJGEy3oobseKV0nGiqu1IKvFkOTVjhV37SWUVExSDFMC6FLzs7xJQIHwkcxr5JFOQNmc4ZytEh_-hmCN3NL-z0fEk98tzBmPJ_F7bq_xNru86QMD2A9yalu_dWe-lCysfyE2bCA2EDqwvWenRYf-0XnNtp6qlxxCMlCd-TDqqRKLC3qefCwpXSemwBiNSP5gbC9pwcKrZugkruuJ0nyxxThZymm";
     }
     
     /// <summary>
@@ -47,6 +46,10 @@ public class PcgsClient : ReactiveObject {
         return testClient;
     }
 
+    /// <summary>
+    /// Sends a request to the API to verify the credentials.
+    /// </summary>
+    /// <returns>A boolean indicating whether or not the credentials are valid.</returns>
     public async Task<bool> VerifyCredentials() {
         // Create a way to check if the api key given is valid
         // I think the best way to do this is to make a request to the api and see if it returns the expected response.
@@ -55,6 +58,13 @@ public class PcgsClient : ReactiveObject {
         return true;
     }
 
+    /// <summary>
+    /// Gets the coin information for a given PCGS number and grade.
+    /// </summary>
+    /// <param name="pcgsNumber">The PCGS number of the coin.</param>
+    /// <param name="grade">The grade of the coin.</param>
+    /// <param name="plusGrade">Whether or not the coin is a plus grade.</param>
+    /// <returns>A tuple containing the error type and the coin information.</returns>
     public async Task<(ErrorType, Coin?)> GetCoinFactsByGrade(int pcgsNumber, string grade, bool plusGrade = false) {
         using (HttpClient client = new HttpClient()) {
             var gradeParam = GetGradeFromString(grade);
@@ -77,15 +87,25 @@ public class PcgsClient : ReactiveObject {
         return (ErrorType.ApiKeyInvalid, null);
     }
 
+    /// <summary>
+    /// Utility function to parse the grade number from the grade string passed from the front end.
+    /// </summary>
+    /// <param name="grade">The grade string.</param>
+    /// <returns>The grade number.</returns>
     private int GetGradeFromString(string grade) {
         var actualGrade = int.Parse(grade.Substring(grade.Length - 2));  // Throws an exception if the grade doesn't exist.
         Console.WriteLine($"Grade is {actualGrade}");
         return actualGrade;
     }
 
+    /// <summary>
+    /// Parses the json response from the api.
+    /// </summary>
+    /// <param name="json">The json response.</param>
+    /// <returns>A tuple containing an error type and the coin information.</returns>
     private (ErrorType, Coin?) ParseJsonResponse(string json) {
         Console.WriteLine(json);
-        // TODO Check for errors in the response
+        // Check for errors in the response
         if (json.Contains("\"ServerMessage\":\"No data found\"")) return (ErrorType.NoCoinFound, null);
         if (json.Contains("\"IsValidRequest\":false")) return (ErrorType.InvalidRequestFormat, null);
 
