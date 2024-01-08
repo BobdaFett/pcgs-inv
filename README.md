@@ -9,11 +9,6 @@ Extract contents of the downloaded file to an accessible folder (ie. Documents/P
 
 As of right now, there's no fancy installer to be used - shortcuts will have to be made by you.
 
-### Note:
-Although I've only properly built this for testing on a Windows machine, it's entirely possible that it's runnable
-on other platforms. If anyone would like a different build for their own platform, feel free to open an issue 
-indicating so.
-
 # Usage
 Usage is limited as of now, however input, deletion, and export of information is working and should not change much
 over the development of the app.
