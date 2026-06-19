@@ -1,23 +1,22 @@
-using System.Reactive;
-using ReactiveUI;
+using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
-namespace PcgsInvUi.ViewModels; 
+namespace PcgsInvUi.ViewModels;
 
-public class ErrorWindowViewModel : ViewModelBase {
+public partial class ErrorWindowViewModel : ViewModelBase {
+    private readonly Window _dialog;
 
-    public string DisplayedMessage {
-        get => _message;
-        set => this.RaiseAndSetIfChanged(ref _message, value);
-    }
-    private string _message;
-
-    public ReactiveCommand<Unit, object> CloseCommand { get; }
-    
-    public ErrorWindowViewModel(string message)
-    {
-        _message = message;
-
-        CloseCommand = ReactiveCommand.Create(() => (object)false);
+    public ErrorWindowViewModel(Window dialog, string message) {
+        _dialog = dialog;
+        Message = message;
     }
 
+    [ObservableProperty]
+    public partial string Message { get; set; }
+
+    [RelayCommand]
+    public void Close() {
+        _dialog.Close();
+    }
 }

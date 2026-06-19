@@ -1,27 +1,26 @@
 ﻿using System.Reactive;
-using PcgsInvUi.Models;
 using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
 public class EditViewModel : ViewModelBase {
-    public Coin CurrentCoin { get; set; }
-
-    public ReactiveCommand<Unit, Unit> OkCommand { get; }
-
-    public EditViewModel(Coin coin) {
-        CurrentCoin = coin;
+    public EditViewModel(PcgsCoin pcgsCoin) {
+        CurrentPcgsCoin = pcgsCoin;
 
         var okEnabled = this.WhenAnyValue(
-            x => x.CurrentCoin.PCGSNo,
-            x => x.CurrentCoin.Grade,
-            x => x.CurrentCoin.Quantity,
+            x => x.CurrentPcgsCoin.PcgsNumber,
+            x => x.CurrentPcgsCoin.Grade,
+            x => x.CurrentPcgsCoin.Quantity,
             (id, grade, quantity) => !string.IsNullOrWhiteSpace(id) &&
                                      !string.IsNullOrWhiteSpace(grade) &&
-                                     (quantity != 0)
+                                     quantity != 0
         );
 
         // Setup OkCommand - all Coin-related properties must be non-whitespace.
         OkCommand = ReactiveCommand.Create(() => { });
     }
+
+    public PcgsCoin CurrentPcgsCoin { get; set; }
+
+    public ReactiveCommand<Unit, Unit> OkCommand { get; }
 }

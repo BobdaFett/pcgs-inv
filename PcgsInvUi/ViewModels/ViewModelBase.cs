@@ -1,5 +1,5 @@
-﻿using ReactiveUI;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace PcgsInvUi.ViewModels;
 
-public class ViewModelBase : ReactiveObject { }
+public class ViewModelBase : ObservableObject { }

@@ -1,7 +1,7 @@
-﻿using Avalonia.ReactiveUI;
+﻿using System;
+using Avalonia.ReactiveUI;
 using PcgsInvUi.ViewModels;
 using ReactiveUI;
-using System;
 
 namespace PcgsInvUi.Views;
 

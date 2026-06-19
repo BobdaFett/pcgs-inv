@@ -5,7 +5,7 @@
         xmlns:viewModels="clr-namespace:PcgsInvUi.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="PcgsInvUi.Views.MainWindow" x:DataType="viewModels:MainWindowViewModel"
-        Title="Main Window" WindowStartupLocation="CenterScreen" WindowState="Maximized" >
+        Title="Main Window" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <SplitView IsPaneOpen="True"
                DisplayMode="Inline"
                PanePlacement="Right">
@@ -15,7 +15,7 @@
                              Content="{Binding SidebarContent}" />
                 <TextBox Grid.Row="1" Margin="5" Watermark="Notes..."
                          Text="{Binding SelectedCoin.Notes}"
-                         IsReadOnly="False" TextWrapping="Wrap"/>
+                         IsReadOnly="False" TextWrapping="Wrap" />
             </Grid>
         </SplitView.Pane>
         <Grid RowDefinitions="*, Auto" ShowGridLines="False">
@@ -51,7 +51,7 @@
                                         Binding="{Binding PriceGuideValue, StringFormat='${0:0.00}'}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="PCGS #" Width="*"
-                                        Binding="{Binding PCGSNo}"
+                                        Binding="{Binding PcgsNumber}"
                                         IsReadOnly="True" />
                     <DataGridTextColumn Header="Quantity" Width="*"
                                         Binding="{Binding Quantity}"

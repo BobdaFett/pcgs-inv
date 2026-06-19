@@ -7,7 +7,7 @@ using PcgsInvUi.Views;
 
 namespace PcgsInvUi;
 
-public partial class App : Application {
+public class App : Application {
     public override void Initialize() {
         AvaloniaXamlLoader.Load(this);
     }
@@ -17,14 +17,13 @@ public partial class App : Application {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) {
             var coins = new CoinDatabase();
             desktop.MainWindow = new MainWindow {
-                DataContext = new MainWindowViewModel(coins),
+                DataContext = new MainWindowViewModel(coins)
             };
-            
+
             // Allow the application to save the database when it exits.
-            desktop.Exit += (sender, args) => {
-                coins.UpdateCollection("CollectionTable");
-            };
+            desktop.Exit += (sender, args) => { coins.UpdateCollection("CollectionTable"); };
         }
+
         base.OnFrameworkInitializationCompleted();
     }
 }

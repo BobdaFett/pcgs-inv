@@ -44,15 +44,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel> {
             SuggestedStartLocation = await StorageProvider.TryGetWellKnownFolderAsync(WellKnownFolder.Documents)
         });
 
-        if (file is not null) {
+        if (file is not null)
             interationContext.SetOutput(file.Path);
-        }
-        else {
+        else
             // TODO Handle user closing the dialog.
             throw new Exception("User cancelled the file picker.");
-        }
     }
-    
+
     private async Task ShowErrorWindowAsync(InteractionContext<ErrorWindowViewModel, bool> interaction) {
         var window = new ErrorWindow();
         window.DataContext = interaction.Input;

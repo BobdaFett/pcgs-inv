@@ -1,30 +1,13 @@
-﻿using System.Reactive;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Reactive;
 using ReactiveUI;
 
 namespace PcgsInvUi.ViewModels;
 
 public class NewViewModel : ViewModelBase {
-    private string _pcgsNumber = "";
     private string _grade = "";
+    private string _pcgsNumber = "";
     private string _quantity = "";
-
-    public string PcgsNumber {
-        get => _pcgsNumber;
-        set => this.RaiseAndSetIfChanged(ref _pcgsNumber, value);
-    }
-
-    public string Grade {
-        get => _grade;
-        set => this.RaiseAndSetIfChanged(ref _grade, value);
-    }
-
-    public string Quantity {
-        get => _quantity;
-        set => this.RaiseAndSetIfChanged(ref _quantity, value);
-    }
-
-    public List<string> GradesList { get; }
 
     public NewViewModel() {
         var okEnabled = this.WhenAnyValue(
@@ -39,9 +22,7 @@ public class NewViewModel : ViewModelBase {
             () => (int.Parse(PcgsNumber), Grade, int.Parse(Quantity)),
             okEnabled);
 
-        ClearCommand = ReactiveCommand.Create(() => {
-            ClearText();
-        });
+        ClearCommand = ReactiveCommand.Create(() => { ClearText(); });
 
         // Initialize grade values for use in the view.
         // This must be typed out manually, as there is no way to get a list of grades from the API.
@@ -79,11 +60,28 @@ public class NewViewModel : ViewModelBase {
         };
     }
 
+    public string PcgsNumber {
+        get => _pcgsNumber;
+        set => this.RaiseAndSetIfChanged(ref _pcgsNumber, value);
+    }
+
+    public string Grade {
+        get => _grade;
+        set => this.RaiseAndSetIfChanged(ref _grade, value);
+    }
+
+    public string Quantity {
+        get => _quantity;
+        set => this.RaiseAndSetIfChanged(ref _quantity, value);
+    }
+
+    public List<string> GradesList { get; }
+
     public ReactiveCommand<Unit, (int, string, int)> OkCommand { get; }
     public ReactiveCommand<Unit, Unit> ClearCommand { get; }
 
     /// <summary>
-    /// Clears the text fields.
+    ///     Clears the text fields.
     /// </summary>
     public void ClearText() {
         PcgsNumber = "";
