@@ -1,0 +1,64 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PcgsInv.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Height="450" Width="800"
+        x:Class="PcgsInv.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="{Binding Collection.Name, StringFormat='PCGS Inventory - {0}'}">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="3*, Auto, *"
+          RowDefinitions="Auto, *">
+        
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <Menu.Items>
+                <MenuItem Header="File">
+                    <MenuItem Header="Hello"/>
+                </MenuItem>
+            </Menu.Items>
+        </Menu>
+        
+        <DockPanel Grid.Row="1" Grid.Column="0">
+            <Grid DockPanel.Dock="Top" Margin="5" ColumnDefinitions="Auto, *">
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Collection name: "/>
+                <TextBox Grid.Column="1" Text="{Binding Collection.Name}" />
+            </Grid>
+            
+            <Button DockPanel.Dock="Top"
+                    Command="{Binding CreateTestingCoinCommand}"
+                    Content="Create Test Coin"/>
+            
+            <TextBlock DockPanel.Dock="Bottom"
+                       Margin="5"
+                       Text="{Binding Collection.TotalValue, StringFormat='Total Value: ${0}'}"/>
+            
+            <DataGrid ItemsSource="{Binding Collection.Coins}"
+                      SelectedItem="{Binding SelectedCoin}"
+                      Margin="5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="*" Header="Name" Binding="{Binding Name}"/>
+                    <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}"/>
+                    <DataGridTextColumn Header="Price" Binding="{Binding PriceGuideValue}"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding TotalPrice}"
+                                        IsReadOnly="True"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+        
+        <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Background="Gray" ResizeDirection="Columns" Margin="3"/>
+        
+        <!-- Some other content -->
+        
+        <DockPanel Grid.Row="1" Grid.Column="2">
+            <TextBlock>This is a test!</TextBlock>
+        </DockPanel>
+    </Grid>
+
+</Window>
